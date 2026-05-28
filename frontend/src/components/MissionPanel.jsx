@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMission, createMission } from "../services/api";
+import { getMission, createMission, resetMission } from "../services/api";
 
 function MissionPanel() {
   const [mission, setMission] = useState({
@@ -30,8 +30,11 @@ function MissionPanel() {
       ]
     };
 
-    createMission(newMission)
-      .then(() => fetchMission());
+    createMission(newMission).then(() => fetchMission());
+  };
+
+  const handleResetMission = () => {
+    resetMission().then(() => fetchMission());
   };
 
   useEffect(() => {
@@ -63,6 +66,20 @@ function MissionPanel() {
           }}
         >
           Create Demo Mission
+        </button>
+
+        <button
+          onClick={handleResetMission}
+          style={{
+            marginTop: "1rem",
+            marginLeft: "1rem",
+            padding: "0.7rem 1.2rem",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer"
+          }}
+        >
+          Reset Mission
         </button>
 
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>

@@ -27,3 +27,14 @@ def create_mission(mission: Mission):
         "message": "Mission created successfully",
         "mission": current_mission
     }
+
+@router.delete("/mission")
+def reset_mission():
+    current_mission["name"] = "None"
+    current_mission["state"] = "Idle"
+    current_mission["waypoints"] = []
+
+    return {
+        "message": "Mission reset successfully",
+        "mission": current_mission
+    }

@@ -29,3 +29,7 @@ export const getMission = () => {
 export const createMission = (mission) => {
   return axios.post(`${API_BASE_URL}/mission`, mission);
 };
+
+export const resetMission = () => {
+  return axios.delete(`${API_BASE_URL}/mission`);
+};

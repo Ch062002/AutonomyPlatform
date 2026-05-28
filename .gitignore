@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# ROS2
+build/
+install/
+log/
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# VS Code
+.vscode/
+
+# Linux
+*.swp
+*.tmp
+
+# PX4 logs
+*.ulg
+
+# Obsidian
+.obsidian/

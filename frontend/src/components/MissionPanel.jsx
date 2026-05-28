@@ -1,4 +1,43 @@
+import { useEffect, useState } from "react";
+import { getMission, createMission } from "../services/api";
+
 function MissionPanel() {
+  const [mission, setMission] = useState({
+    name: "None",
+    state: "Idle",
+    waypoints: []
+  });
+
+  const fetchMission = () => {
+    getMission()
+      .then((response) => setMission(response.data))
+      .catch(() => {
+        setMission({
+          name: "Unavailable",
+          state: "Disconnected",
+          waypoints: []
+        });
+      });
+  };
+
+  const handleCreateMission = () => {
+    const newMission = {
+      name: "Demo Surveillance Mission",
+      waypoints: [
+        { lat: 18.5204, lon: 73.8567, alt: 100 },
+        { lat: 18.5210, lon: 73.8575, alt: 120 },
+        { lat: 18.5220, lon: 73.8580, alt: 110 }
+      ]
+    };
+
+    createMission(newMission)
+      .then(() => fetchMission());
+  };
+
+  useEffect(() => {
+    fetchMission();
+  }, []);
+
   return (
     <div style={{ marginTop: "2rem" }}>
       <h2>Mission Control</h2>
@@ -9,18 +48,21 @@ function MissionPanel() {
         borderRadius: "10px",
         border: "1px solid #334155"
       }}>
-        <p>Current Mission: Not Assigned</p>
-        <p>Mission State: Idle</p>
-        <p>Waypoint Count: 0</p>
+        <p>Current Mission: {mission.name}</p>
+        <p>Mission State: {mission.state}</p>
+        <p>Waypoint Count: {mission.waypoints.length}</p>
 
-        <button style={{
-          marginTop: "1rem",
-          padding: "0.7rem 1.2rem",
-          borderRadius: "8px",
-          border: "none",
-          cursor: "pointer"
-        }}>
-          Create Mission
+        <button
+          onClick={handleCreateMission}
+          style={{
+            marginTop: "1rem",
+            padding: "0.7rem 1.2rem",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer"
+          }}
+        >
+          Create Demo Mission
         </button>
       </div>
     </div>

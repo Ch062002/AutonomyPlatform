@@ -1,3 +1,4 @@
+from app.api.mission import router as mission_router
 from app.api.telemetry import router as telemetry_router
 from app.api.gazebo_status import router as gazebo_router
 from app.api.px4_status import router as px4_router
@@ -24,6 +25,7 @@ app.include_router(ros2_router)
 app.include_router(px4_router)
 app.include_router(gazebo_router)
 app.include_router(telemetry_router)
+app.include_router(mission_router)
 
 @app.get("/")
 def root():

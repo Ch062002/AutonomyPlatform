@@ -21,3 +21,11 @@ export const getGazeboStatus = () => {
 export const getTelemetry = () => {
   return axios.get(`${API_BASE_URL}/telemetry`);
 };
+
+export const getMission = () => {
+  return axios.get(`${API_BASE_URL}/mission`);
+};
+
+export const createMission = (mission) => {
+  return axios.post(`${API_BASE_URL}/mission`, mission);
+};

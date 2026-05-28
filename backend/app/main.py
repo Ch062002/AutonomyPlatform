@@ -1,3 +1,5 @@
+from app.api.telemetry import router as telemetry_router
+from app.api.gazebo_status import router as gazebo_router
 from app.api.px4_status import router as px4_router
 from app.api.ros2_status import router as ros2_router
 from fastapi import FastAPI
@@ -20,6 +22,8 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(ros2_router)
 app.include_router(px4_router)
+app.include_router(gazebo_router)
+app.include_router(telemetry_router)
 
 @app.get("/")
 def root():

@@ -1,4 +1,11 @@
 function TelemetryCard({ telemetry }) {
+  const getBatteryColor = (battery) => {
+    if (battery === "--") return "#facc15";
+    if (battery >= 70) return "#22c55e";
+    if (battery >= 40) return "#facc15";
+    return "#ef4444";
+  };
+
   const itemStyle = {
     backgroundColor: "#1e293b",
     padding: "1rem",
@@ -28,7 +35,9 @@ function TelemetryCard({ telemetry }) {
 
         <div style={itemStyle}>
           <h3>Battery</h3>
-          <p>{telemetry.battery} %</p>
+          <p style={{ color: getBatteryColor(telemetry.battery) }}>
+            {telemetry.battery} %
+          </p>
         </div>
 
         <div style={itemStyle}>

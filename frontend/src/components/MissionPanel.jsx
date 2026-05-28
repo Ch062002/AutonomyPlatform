@@ -64,6 +64,22 @@ function MissionPanel() {
         >
           Create Demo Mission
         </button>
+
+        <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+          <h3>Waypoints</h3>
+
+          {mission.waypoints.length === 0 ? (
+            <p>No waypoints assigned.</p>
+          ) : (
+            <ul>
+              {mission.waypoints.map((wp, index) => (
+                <li key={index}>
+                  WP{index + 1}: Lat {wp.lat}, Lon {wp.lon}, Alt {wp.alt} m
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

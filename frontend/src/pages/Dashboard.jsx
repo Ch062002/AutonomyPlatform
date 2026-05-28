@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import StatusCard from "../components/StatusCard";
 import TelemetryCard from "../components/TelemetryCard";
+import MissionPanel from "../components/MissionPanel";
 
 import {
   getBackendStatus,
@@ -96,6 +97,8 @@ function Dashboard() {
         />
 
         <TelemetryCard telemetry={telemetry} />
+
+        <MissionPanel />
       </main>
     </div>
   );

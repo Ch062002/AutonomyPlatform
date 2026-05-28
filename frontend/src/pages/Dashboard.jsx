@@ -25,23 +25,25 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    getBackendStatus()
-      .then((response) => setBackendStatus(response.data.status))
-      .catch(() => setBackendStatus("Disconnected"));
+    const fetchSystemStatus = () => {
+      getBackendStatus()
+        .then((response) => setBackendStatus(response.data.status))
+        .catch(() => setBackendStatus("Disconnected"));
 
-    getRos2Status()
-      .then((response) => setRos2Status(response.data.status))
-      .catch(() => setRos2Status("Disconnected"));
+      getRos2Status()
+        .then((response) => setRos2Status(response.data.status))
+        .catch(() => setRos2Status("Disconnected"));
 
-    getPx4Status()
-      .then((response) => setPx4Status(response.data.status))
-      .catch(() => setPx4Status("Disconnected"));
+      getPx4Status()
+        .then((response) => setPx4Status(response.data.status))
+        .catch(() => setPx4Status("Disconnected"));
 
-    getGazeboStatus()
-      .then((response) => setGazeboStatus(response.data.status))
-      .catch(() => setGazeboStatus("Disconnected"));
+      getGazeboStatus()
+        .then((response) => setGazeboStatus(response.data.status))
+        .catch(() => setGazeboStatus("Disconnected"));
+    };
 
-    const telemetryInterval = setInterval(() => {
+    const fetchTelemetry = () => {
       getTelemetry()
         .then((response) => setTelemetry(response.data))
         .catch(() => {
@@ -52,9 +54,18 @@ function Dashboard() {
             flight_mode: "--"
           });
         });
-    }, 1000);
+    };
 
-    return () => clearInterval(telemetryInterval);
+    fetchSystemStatus();
+    fetchTelemetry();
+
+    const statusInterval = setInterval(fetchSystemStatus, 3000);
+    const telemetryInterval = setInterval(fetchTelemetry, 1000);
+
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(telemetryInterval);
+    };
   }, []);
 
   return (

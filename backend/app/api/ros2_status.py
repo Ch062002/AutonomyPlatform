@@ -16,7 +16,7 @@ def ros2_status():
         topics = result.stdout.splitlines()
 
         return {
-            "status": "running" if "/telemetry_status" in topics else "no telemetry",
+            "status": "running" if "/telemetry_data" in topics else "no telemetry",
             "topics": topics
         }
 

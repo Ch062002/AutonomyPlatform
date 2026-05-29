@@ -9,6 +9,7 @@ import CommandPanel from "../components/CommandPanel";
 import CommandLog from "../components/CommandLog";
 import VehicleHealthPanel from "../components/VehicleHealthPanel";
 import MapPanel from "../components/MapPanel";
+import MissionStatusPanel from "../components/MissionStatusPanel";
 
 import {
   getBackendStatus,
@@ -128,6 +129,10 @@ function Dashboard() {
 
             <div>
               <MapPanel telemetry={telemetry} />
+
+              <div style={{ marginTop: "2rem" }}>
+                <MissionStatusPanel />
+              </div>
 
               <div style={{ marginTop: "2rem" }}>
                 <VehicleHealthPanel telemetry={telemetry} />

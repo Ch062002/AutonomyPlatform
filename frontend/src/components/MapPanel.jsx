@@ -1,5 +1,15 @@
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+
+import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap
+} from "react-leaflet";
+
 import L from "leaflet";
 
 const droneIcon = L.divIcon({
@@ -16,32 +26,54 @@ const waypointIcon = L.divIcon({
   iconAnchor: [14, 28]
 });
 
-const homeIcon = L.divIcon({
-  html: "🏠",
-  className: "home-marker",
-  iconSize: [28, 28],
-  iconAnchor: [14, 28]
-});
+function FollowDrone({ position }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [position, map]);
+
+  return null;
+}
 
 function MapPanel({ telemetry }) {
-  const homePosition = [47.3977, 8.5456];
+  const lat = Number(telemetry.latitude) || 47.3977;
+  const lon = Number(telemetry.longitude) || 8.5456;
+
+  const dronePosition = [lat, lon];
+  const [trail, setTrail] = useState([]);
+
+  useEffect(() => {
+    setTrail((prev) => {
+      const lastPoint = prev[prev.length - 1];
+
+      if (
+        lastPoint &&
+        Math.abs(lastPoint[0] - lat) < 0.000001 &&
+        Math.abs(lastPoint[1] - lon) < 0.000001
+      ) {
+        return prev;
+      }
+
+      return [...prev.slice(-80), dronePosition];
+    });
+  }, [lat, lon]);
 
   const waypoints = [
-    [47.3982, 8.5461],
-    [47.3987, 8.5452],
-    [47.3979, 8.5444],
-    [47.3974, 8.5451]
+    [lat + 0.0005, lon + 0.0005],
+    [lat + 0.001, lon - 0.0004],
+    [lat + 0.0002, lon - 0.001]
   ];
 
-  const routePath = [homePosition, ...waypoints, homePosition];
+  const missionPath = [dronePosition, ...waypoints];
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Live Map & Position</h2>
+      <h2 style={{ textAlign: "center" }}>Live Map & Trajectory</h2>
 
       <div
         style={{
-          height: "320px",
+          height: "420px",
           backgroundColor: "#1e293b",
           borderRadius: "14px",
           border: "1px solid #334155",
@@ -50,37 +82,46 @@ function MapPanel({ telemetry }) {
         }}
       >
         <MapContainer
-          center={homePosition}
-          zoom={16}
+          center={dronePosition}
+          zoom={17}
           style={{ height: "100%", width: "100%" }}
         >
+          <FollowDrone position={dronePosition} />
+
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
           <Polyline
-            positions={routePath}
+            positions={missionPath}
             pathOptions={{
               color: "#22c55e",
-              weight: 4,
-              opacity: 0.8
+              weight: 3,
+              opacity: 0.7
             }}
           />
 
-          <Marker position={homePosition} icon={homeIcon}>
-            <Popup>
-              <strong>Home / Launch Point</strong>
-            </Popup>
-          </Marker>
+          {trail.length > 1 && (
+            <Polyline
+              positions={trail}
+              pathOptions={{
+                color: "#38bdf8",
+                weight: 4,
+                opacity: 0.9
+              }}
+            />
+          )}
 
-          <Marker position={homePosition} icon={droneIcon}>
+          <Marker position={dronePosition} icon={droneIcon}>
             <Popup>
               <strong>PX4 SITL UAV</strong>
               <br />
-              Altitude: {telemetry.altitude} m
+              Lat: {lat}
               <br />
-              Velocity: {telemetry.velocity} m/s
+              Lon: {lon}
+              <br />
+              Altitude: {telemetry.altitude} m
               <br />
               Mode: {telemetry.flight_mode}
             </Popup>
@@ -91,13 +132,29 @@ function MapPanel({ telemetry }) {
               <Popup>
                 <strong>Waypoint {index + 1}</strong>
                 <br />
-                Lat: {wp[0]}
+                Lat: {wp[0].toFixed(6)}
                 <br />
-                Lon: {wp[1]}
+                Lon: {wp[1].toFixed(6)}
               </Popup>
             </Marker>
           ))}
         </MapContainer>
+      </div>
+
+      <div
+        style={{
+          marginTop: "0.8rem",
+          backgroundColor: "#1e293b",
+          padding: "0.8rem",
+          borderRadius: "10px",
+          border: "1px solid #334155",
+          textAlign: "center"
+        }}
+      >
+        <strong>Live Position:</strong>
+        <p>Lat: {lat.toFixed(7)}</p>
+        <p>Lon: {lon.toFixed(7)}</p>
+        <p>Global Altitude: {telemetry.global_altitude} m</p>
       </div>
     </div>
   );

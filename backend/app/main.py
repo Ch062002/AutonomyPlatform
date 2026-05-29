@@ -1,4 +1,5 @@
 import asyncio
+from app.api.command import router as command_router
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +36,7 @@ app.include_router(px4_router)
 app.include_router(gazebo_router)
 app.include_router(telemetry_router)
 app.include_router(mission_router)
+app.include_router(command_router)
 
 
 @app.get("/")

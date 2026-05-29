@@ -33,3 +33,19 @@ export const createMission = (mission) => {
 export const resetMission = () => {
   return axios.delete(`${API_BASE_URL}/mission`);
 };
+
+export const armVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/arm`);
+};
+
+export const disarmVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/disarm`);
+};
+
+export const takeoffVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/takeoff`);
+};
+
+export const landVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/land`);
+};

@@ -130,6 +130,11 @@ Current capabilities:
 - Live telemetry visualization
 - Mission management prototype
 - Aerospace autonomy software stack foundation
+- Real PX4 telemetry through ROS2
+- Real PX4 altitude and velocity display
+- Real PX4 battery telemetry
+- PX4 vehicle status display
+- Human-readable nav state and arming states
 
 ---
 

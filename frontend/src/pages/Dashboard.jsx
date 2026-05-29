@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import StatusCard from "../components/StatusCard";
 import TelemetryCard from "../components/TelemetryCard";
+import TelemetryCharts from "../components/TelemetryCharts";
 import MissionPanel from "../components/MissionPanel";
 
 import {
@@ -22,8 +23,12 @@ function Dashboard() {
     altitude: "--",
     velocity: "--",
     battery: "--",
-    flight_mode: "--"
+    flight_mode: "--",
+    arming_state: "--",
+    failsafe: false
   });
+
+  const [telemetryHistory, setTelemetryHistory] = useState([]);
 
   useEffect(() => {
     const fetchSystemStatus = () => {
@@ -46,13 +51,30 @@ function Dashboard() {
 
     const fetchTelemetry = () => {
       getTelemetry()
-        .then((response) => setTelemetry(response.data))
+        .then((response) => {
+          const data = response.data;
+
+          setTelemetry(data);
+
+          setTelemetryHistory((prev) => {
+            const newPoint = {
+              time: new Date().toLocaleTimeString(),
+              altitude: Number(data.altitude),
+              velocity: Number(data.velocity),
+              battery: Number(data.battery)
+            };
+
+            return [...prev.slice(-30), newPoint];
+          });
+        })
         .catch(() => {
           setTelemetry({
             altitude: "--",
             velocity: "--",
             battery: "--",
-            flight_mode: "--"
+            flight_mode: "--",
+            arming_state: "--",
+            failsafe: false
           });
         });
     };
@@ -97,6 +119,8 @@ function Dashboard() {
         />
 
         <TelemetryCard telemetry={telemetry} />
+
+        <TelemetryCharts history={telemetryHistory} />
 
         <MissionPanel />
       </main>

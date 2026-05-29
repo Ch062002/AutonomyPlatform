@@ -7,6 +7,8 @@ import TelemetryCharts from "../components/TelemetryCharts";
 import MissionPanel from "../components/MissionPanel";
 import CommandPanel from "../components/CommandPanel";
 import CommandLog from "../components/CommandLog";
+import VehicleHealthPanel from "../components/VehicleHealthPanel";
+import MapPanel from "../components/MapPanel";
 
 import {
   getBackendStatus,
@@ -35,69 +37,44 @@ function Dashboard() {
   const [commandLogs, setCommandLogs] = useState([]);
 
   const addCommandLog = (message) => {
-    const newLog = {
-      time: new Date().toLocaleTimeString(),
-      message
-    };
-
-    setCommandLogs((prev) => [newLog, ...prev.slice(0, 9)]);
+    setCommandLogs((prev) => [
+      { time: new Date().toLocaleTimeString(), message },
+      ...prev.slice(0, 9)
+    ]);
   };
 
   useEffect(() => {
     const fetchSystemStatus = () => {
-      getBackendStatus()
-        .then((response) => setBackendStatus(response.data.status))
-        .catch(() => setBackendStatus("Disconnected"));
-
-      getRos2Status()
-        .then((response) => setRos2Status(response.data.status))
-        .catch(() => setRos2Status("Disconnected"));
-
-      getPx4Status()
-        .then((response) => setPx4Status(response.data.status))
-        .catch(() => setPx4Status("Disconnected"));
-
-      getGazeboStatus()
-        .then((response) => setGazeboStatus(response.data.status))
-        .catch(() => setGazeboStatus("Disconnected"));
+      getBackendStatus().then((r) => setBackendStatus(r.data.status)).catch(() => setBackendStatus("Disconnected"));
+      getRos2Status().then((r) => setRos2Status(r.data.status)).catch(() => setRos2Status("Disconnected"));
+      getPx4Status().then((r) => setPx4Status(r.data.status)).catch(() => setPx4Status("Disconnected"));
+      getGazeboStatus().then((r) => setGazeboStatus(r.data.status)).catch(() => setGazeboStatus("Disconnected"));
     };
 
     fetchSystemStatus();
-
     const statusInterval = setInterval(fetchSystemStatus, 3000);
 
-    const telemetrySocket = new WebSocket(
-      "ws://localhost:8000/ws/telemetry"
-    );
+    const telemetrySocket = new WebSocket("ws://localhost:8000/ws/telemetry");
 
-    telemetrySocket.onopen = () => {
-      setStreamStatus("Connected");
-    };
+    telemetrySocket.onopen = () => setStreamStatus("Connected");
 
     telemetrySocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
       setTelemetry(data);
 
-      setTelemetryHistory((prev) => {
-        const newPoint = {
+      setTelemetryHistory((prev) => [
+        ...prev.slice(-30),
+        {
           time: new Date().toLocaleTimeString(),
           altitude: Number(data.altitude),
           velocity: Number(data.velocity),
           battery: Number(data.battery)
-        };
-
-        return [...prev.slice(-30), newPoint];
-      });
+        }
+      ]);
     };
 
-    telemetrySocket.onerror = () => {
-      setStreamStatus("Error");
-    };
-
-    telemetrySocket.onclose = () => {
-      setStreamStatus("Disconnected");
-    };
+    telemetrySocket.onerror = () => setStreamStatus("Error");
+    telemetrySocket.onclose = () => setStreamStatus("Disconnected");
 
     return () => {
       clearInterval(statusInterval);
@@ -106,100 +83,66 @@ function Dashboard() {
   }, []);
 
   return (
-    <div
-      style={{
-        backgroundColor: "#0f172a",
-        color: "white",
-        minHeight: "100vh",
-        fontFamily: "Arial, sans-serif",
-        overflowX: "hidden"
-      }}
-    >
+    <div className="app-shell">
       <Sidebar />
 
-      <main
-        style={{
-          marginLeft: "240px",
-          minHeight: "100vh",
-          padding: "2rem",
-          boxSizing: "border-box"
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto"
-          }}
-        >
-          <header
-            style={{
-              marginBottom: "2rem",
-              textAlign: "center"
-            }}
-          >
-            <h1
-              style={{
-                marginBottom: "0.4rem",
-                fontSize: "3rem",
-                lineHeight: "1.1"
-              }}
-            >
-              Aerospace Autonomy Platform
-            </h1>
+      <main className="main-area">
+        <section className="dashboard-container">
+          <header className="dashboard-header">
+            <h1>Aerospace Autonomy Platform</h1>
+            <p>Mission Intelligence & Autonomous Systems Dashboard</p>
 
-            <p
-              style={{
-                color: "#94a3b8",
-                marginBottom: "1.5rem"
-              }}
-            >
-              Mission Intelligence & Autonomous Systems Dashboard
-            </p>
-
-            <div
-              style={{
-                display: "inline-block",
-                padding: "0.8rem 1.2rem",
-                backgroundColor:
-                  streamStatus === "Connected"
-                    ? "#064e3b"
-                    : "#7f1d1d",
-                borderRadius: "12px",
-                border: "1px solid #334155",
-                fontWeight: "bold"
-              }}
-            >
+            <div className={`stream-badge ${streamStatus === "Connected" ? "ok" : "bad"}`}>
               Telemetry Stream: {streamStatus}
             </div>
           </header>
 
-          <StatusCard
-            backendStatus={backendStatus}
-            ros2Status={ros2Status}
-            px4Status={px4Status}
-            gazeboStatus={gazeboStatus}
-          />
-
-          <div style={{ marginTop: "2rem" }}>
-            <TelemetryCard telemetry={telemetry} />
+          <div style={{ marginBottom: "2rem" }}>
+            <StatusCard
+              backendStatus={backendStatus}
+              ros2Status={ros2Status}
+              px4Status={px4Status}
+              gazeboStatus={gazeboStatus}
+            />
           </div>
 
-          <div style={{ marginTop: "2rem" }}>
-            <TelemetryCharts history={telemetryHistory} />
-          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr",
+              gap: "2rem",
+              alignItems: "start"
+            }}
+          >
+            <div>
+              <TelemetryCard telemetry={telemetry} />
 
-          <div style={{ marginTop: "2rem" }}>
-            <CommandPanel addCommandLog={addCommandLog} />
-          </div>
+              <div style={{ marginTop: "2rem" }}>
+                <TelemetryCharts history={telemetryHistory} />
+              </div>
 
-          <div style={{ marginTop: "2rem" }}>
-            <CommandLog logs={commandLogs} />
-          </div>
+              <div style={{ marginTop: "2rem" }}>
+                <CommandPanel addCommandLog={addCommandLog} />
+              </div>
+            </div>
 
-          <div style={{ marginTop: "2rem" }}>
-            <MissionPanel />
+            <div>
+              <MapPanel telemetry={telemetry} />
+
+              <div style={{ marginTop: "2rem" }}>
+                <VehicleHealthPanel telemetry={telemetry} />
+              </div>
+
+              <div style={{ marginTop: "2rem" }}>
+                <CommandLog logs={commandLogs} />
+              </div>
+
+              <div style={{ marginTop: "2rem" }}>
+                <MissionPanel />
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

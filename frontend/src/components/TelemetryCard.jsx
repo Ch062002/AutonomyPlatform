@@ -15,7 +15,7 @@ function TelemetryCard({ telemetry }) {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h2>Live Telemetry</h2>
+      <h2>Live PX4 Telemetry</h2>
 
       <div style={{
         display: "grid",
@@ -41,8 +41,20 @@ function TelemetryCard({ telemetry }) {
         </div>
 
         <div style={itemStyle}>
-          <h3>Flight Mode</h3>
+          <h3>Nav State</h3>
           <p>{telemetry.flight_mode}</p>
+        </div>
+
+        <div style={itemStyle}>
+          <h3>Arming State</h3>
+          <p>{telemetry.arming_state}</p>
+        </div>
+
+        <div style={itemStyle}>
+          <h3>Failsafe</h3>
+          <p style={{ color: telemetry.failsafe ? "#ef4444" : "#22c55e" }}>
+            {telemetry.failsafe ? "ACTIVE" : "Normal"}
+          </p>
         </div>
       </div>
     </div>

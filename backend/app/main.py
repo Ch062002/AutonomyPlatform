@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
@@ -12,6 +12,7 @@ from app.api.mission import router as mission_router
 
 from app.services.ros2_bridge import start_ros2_bridge
 import app.services.ros2_bridge as ros2_bridge
+
 
 app = FastAPI(
     title="Aerospace Autonomy Platform Backend",
@@ -45,10 +46,15 @@ def root():
 async def telemetry_websocket(websocket: WebSocket):
     await websocket.accept()
 
+    print("Telemetry WebSocket connected")
+
     try:
         while True:
             await websocket.send_json(ros2_bridge.latest_telemetry)
             await asyncio.sleep(1)
 
-    except Exception:
-        await websocket.close()
+    except WebSocketDisconnect:
+        print("Telemetry WebSocket disconnected")
+
+    except Exception as e:
+        print(f"Telemetry WebSocket error: {e}")

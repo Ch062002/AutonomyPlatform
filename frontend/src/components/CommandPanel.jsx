@@ -8,7 +8,6 @@ import {
 } from "../services/api";
 
 function CommandPanel() {
-
   const [commandStatus, setCommandStatus] = useState("No command sent");
 
   const buttonStyle = {
@@ -22,6 +21,17 @@ function CommandPanel() {
   };
 
   const sendCommand = async (commandFunction, label) => {
+    if (label === "TAKEOFF" || label === "LAND") {
+      const confirmed = window.confirm(
+        `Are you sure you want to send ${label} command?`
+      );
+
+      if (!confirmed) {
+        setCommandStatus(`${label} command cancelled`);
+        return;
+      }
+    }
+
     try {
       await commandFunction();
       setCommandStatus(`${label} command sent successfully`);
@@ -40,44 +50,30 @@ function CommandPanel() {
         borderRadius: "10px",
         border: "1px solid #334155"
       }}>
-
         <button
           onClick={() => sendCommand(armVehicle, "ARM")}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#22c55e"
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#22c55e" }}
         >
           ARM
         </button>
 
         <button
           onClick={() => sendCommand(disarmVehicle, "DISARM")}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#ef4444",
-            color: "white"
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#ef4444", color: "white" }}
         >
           DISARM
         </button>
 
         <button
           onClick={() => sendCommand(takeoffVehicle, "TAKEOFF")}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#38bdf8"
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#38bdf8" }}
         >
           TAKEOFF
         </button>
 
         <button
           onClick={() => sendCommand(landVehicle, "LAND")}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#facc15"
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#facc15" }}
         >
           LAND
         </button>
@@ -92,7 +88,6 @@ function CommandPanel() {
           <strong>Command Status:</strong>
           <p>{commandStatus}</p>
         </div>
-
       </div>
     </div>
   );

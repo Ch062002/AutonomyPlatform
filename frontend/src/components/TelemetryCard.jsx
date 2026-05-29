@@ -9,20 +9,24 @@ function TelemetryCard({ telemetry }) {
   const itemStyle = {
     backgroundColor: "#1e293b",
     padding: "1rem",
-    borderRadius: "10px",
-    border: "1px solid #334155"
+    borderRadius: "14px",
+    border: "1px solid #334155",
+    boxShadow: "0 0 15px rgba(59,130,246,0.15)",
+    textAlign: "center"
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h2>Live PX4 Telemetry</h2>
+    <div>
+      <h2 style={{ textAlign: "center" }}>Live PX4 Telemetry</h2>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-        gap: "1rem",
-        marginTop: "1rem"
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: "1rem",
+          marginTop: "1rem"
+        }}
+      >
         <div style={itemStyle}>
           <h3>Altitude</h3>
           <p>{telemetry.altitude} m</p>

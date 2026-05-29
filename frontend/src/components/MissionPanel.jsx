@@ -42,45 +42,50 @@ function MissionPanel() {
   }, []);
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h2>Mission Control</h2>
+    <div>
+      <h2 style={{ textAlign: "center" }}>Mission Control</h2>
 
-      <div style={{
-        backgroundColor: "#1e293b",
-        padding: "1rem",
-        borderRadius: "10px",
-        border: "1px solid #334155"
-      }}>
-        <p>Current Mission: {mission.name}</p>
-        <p>Mission State: {mission.state}</p>
-        <p>Waypoint Count: {mission.waypoints.length}</p>
+      <div
+        style={{
+          backgroundColor: "#1e293b",
+          padding: "1rem",
+          borderRadius: "14px",
+          border: "1px solid #334155",
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)"
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <p>Current Mission: {mission.name}</p>
+          <p>Mission State: {mission.state}</p>
+          <p>Waypoint Count: {mission.waypoints.length}</p>
 
-        <button
-          onClick={handleCreateMission}
-          style={{
-            marginTop: "1rem",
-            padding: "0.7rem 1.2rem",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          Create Demo Mission
-        </button>
+          <button
+            onClick={handleCreateMission}
+            style={{
+              marginTop: "1rem",
+              padding: "0.7rem 1.2rem",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer"
+            }}
+          >
+            Create Demo Mission
+          </button>
 
-        <button
-          onClick={handleResetMission}
-          style={{
-            marginTop: "1rem",
-            marginLeft: "1rem",
-            padding: "0.7rem 1.2rem",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          Reset Mission
-        </button>
+          <button
+            onClick={handleResetMission}
+            style={{
+              marginTop: "1rem",
+              marginLeft: "1rem",
+              padding: "0.7rem 1.2rem",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer"
+            }}
+          >
+            Reset Mission
+          </button>
+        </div>
 
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>Waypoints</h3>

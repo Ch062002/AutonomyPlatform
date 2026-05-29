@@ -10,26 +10,40 @@ import {
 
 function TelemetryCharts({ history }) {
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h2>Telemetry Graphs</h2>
+    <div>
+      <h2
+        style={{
+          marginBottom: "1rem",
+          textAlign: "center"
+        }}
+      >
+        Telemetry Graphs
+      </h2>
 
-      <div style={{
-        backgroundColor: "#1e293b",
-        padding: "1rem",
-        borderRadius: "10px",
-        border: "1px solid #334155"
-      }}>
-        <ResponsiveContainer width="100%" height={300}>
+      <div
+        style={{
+          backgroundColor: "#1e293b",
+          padding: "1rem",
+          borderRadius: "14px",
+          border: "1px solid #334155",
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)"
+        }}
+      >
+        <ResponsiveContainer width="100%" height={340}>
           <LineChart data={history}>
             <CartesianGrid strokeDasharray="3 3" />
+
             <XAxis dataKey="time" />
+
             <YAxis />
+
             <Tooltip />
 
             <Line
               type="monotone"
               dataKey="altitude"
               stroke="#22c55e"
+              strokeWidth={2}
               dot={false}
             />
 
@@ -37,6 +51,7 @@ function TelemetryCharts({ history }) {
               type="monotone"
               dataKey="velocity"
               stroke="#38bdf8"
+              strokeWidth={2}
               dot={false}
             />
           </LineChart>

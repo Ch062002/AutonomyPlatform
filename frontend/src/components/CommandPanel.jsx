@@ -41,22 +41,26 @@ function CommandPanel({ addCommandLog }) {
       await commandFunction();
       setCommandStatus(`${label} command sent successfully`);
       addCommandLog(`${label} command sent successfully`);
-    } catch (error) {
+    } catch {
       setCommandStatus(`${label} command failed`);
       addCommandLog(`${label} command failed`);
     }
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h2>Vehicle Command Panel</h2>
+    <div>
+      <h2 style={{ textAlign: "center" }}>Vehicle Command Panel</h2>
 
-      <div style={{
-        backgroundColor: "#1e293b",
-        padding: "1rem",
-        borderRadius: "10px",
-        border: "1px solid #334155"
-      }}>
+      <div
+        style={{
+          backgroundColor: "#1e293b",
+          padding: "1rem",
+          borderRadius: "14px",
+          border: "1px solid #334155",
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)",
+          textAlign: "center"
+        }}
+      >
         <button onClick={() => sendCommand(armVehicle, "ARM")} style={{ ...buttonStyle, backgroundColor: "#22c55e", color: "white" }}>
           ARM
         </button>
@@ -81,13 +85,15 @@ function CommandPanel({ addCommandLog }) {
           RTL
         </button>
 
-        <div style={{
-          marginTop: "1.5rem",
-          padding: "0.8rem",
-          backgroundColor: "#0f172a",
-          borderRadius: "8px",
-          border: "1px solid #334155"
-        }}>
+        <div
+          style={{
+            marginTop: "1.5rem",
+            padding: "0.8rem",
+            backgroundColor: "#0f172a",
+            borderRadius: "10px",
+            border: "1px solid #334155"
+          }}
+        >
           <strong>Command Status:</strong>
           <p>{commandStatus}</p>
         </div>

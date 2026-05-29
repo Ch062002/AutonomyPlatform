@@ -49,3 +49,11 @@ export const takeoffVehicle = () => {
 export const landVehicle = () => {
   return axios.post(`${API_BASE_URL}/command/land`);
 };
+
+export const rtlVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/rtl`);
+};
+
+export const holdVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/hold`);
+};

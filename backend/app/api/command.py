@@ -14,35 +14,35 @@ def run_command(command: str):
 
 @router.post("/command/arm")
 def arm_vehicle():
-    try:
-        run_command("arm")
-        return {"status": "success", "message": "ARM command sent"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    run_command("arm")
+    return {"status": "success", "message": "ARM command sent"}
 
 
 @router.post("/command/disarm")
 def disarm_vehicle():
-    try:
-        run_command("disarm")
-        return {"status": "success", "message": "DISARM command sent"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    run_command("disarm")
+    return {"status": "success", "message": "DISARM command sent"}
 
 
 @router.post("/command/takeoff")
 def takeoff_vehicle():
-    try:
-        run_command("takeoff 10")
-        return {"status": "success", "message": "TAKEOFF command sent"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    run_command("takeoff 10")
+    return {"status": "success", "message": "TAKEOFF command sent"}
 
 
 @router.post("/command/land")
 def land_vehicle():
-    try:
-        run_command("land")
-        return {"status": "success", "message": "LAND command sent"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    run_command("land")
+    return {"status": "success", "message": "LAND command sent"}
+
+
+@router.post("/command/rtl")
+def rtl_vehicle():
+    run_command("rtl")
+    return {"status": "success", "message": "RTL command sent"}
+
+
+@router.post("/command/hold")
+def hold_vehicle():
+    run_command("hold")
+    return {"status": "success", "message": "HOLD command sent"}

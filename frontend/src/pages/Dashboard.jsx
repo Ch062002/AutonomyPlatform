@@ -5,6 +5,7 @@ import TelemetryCard from "../components/TelemetryCard";
 import TelemetryCharts from "../components/TelemetryCharts";
 import MissionPanel from "../components/MissionPanel";
 import CommandPanel from "../components/CommandPanel";
+import CommandLog from "../components/CommandLog";
 
 import {
   getBackendStatus,
@@ -30,6 +31,16 @@ function Dashboard() {
 
   const [telemetryHistory, setTelemetryHistory] = useState([]);
   const [streamStatus, setStreamStatus] = useState("Connecting...");
+  const [commandLogs, setCommandLogs] = useState([]);
+
+  const addCommandLog = (message) => {
+    const newLog = {
+      time: new Date().toLocaleTimeString(),
+      message: message
+    };
+
+    setCommandLogs((prev) => [newLog, ...prev.slice(0, 9)]);
+  };
 
   useEffect(() => {
     const fetchSystemStatus = () => {
@@ -55,13 +66,10 @@ function Dashboard() {
 
     const telemetrySocket = new WebSocket("ws://localhost:8000/ws/telemetry");
 
-    telemetrySocket.onopen = () => {
-      setStreamStatus("Connected");
-    };
+    telemetrySocket.onopen = () => setStreamStatus("Connected");
 
     telemetrySocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
       setTelemetry(data);
 
       setTelemetryHistory((prev) => {
@@ -76,13 +84,8 @@ function Dashboard() {
       });
     };
 
-    telemetrySocket.onerror = () => {
-      setStreamStatus("Error");
-    };
-
-    telemetrySocket.onclose = () => {
-      setStreamStatus("Disconnected");
-    };
+    telemetrySocket.onerror = () => setStreamStatus("Error");
+    telemetrySocket.onclose = () => setStreamStatus("Disconnected");
 
     return () => {
       clearInterval(statusInterval);
@@ -98,18 +101,12 @@ function Dashboard() {
       padding: "2rem",
       fontFamily: "Arial, sans-serif"
     }}>
-      <header style={{
-        textAlign: "center",
-        marginBottom: "2rem"
-      }}>
+      <header style={{ textAlign: "center", marginBottom: "2rem" }}>
         <h1>Aerospace Autonomy Platform</h1>
         <p>Mission Intelligence & Autonomous Systems Dashboard</p>
       </header>
 
-      <main style={{
-        maxWidth: "1100px",
-        margin: "0 auto"
-      }}>
+      <main style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <StatusCard
           backendStatus={backendStatus}
           ros2Status={ros2Status}
@@ -128,7 +125,9 @@ function Dashboard() {
 
         <TelemetryCharts history={telemetryHistory} />
 
-        <CommandPanel />
+        <CommandPanel addCommandLog={addCommandLog} />
+
+        <CommandLog logs={commandLogs} />
 
         <MissionPanel />
       </main>

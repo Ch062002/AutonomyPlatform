@@ -9,7 +9,7 @@ import {
   holdVehicle
 } from "../services/api";
 
-function CommandPanel() {
+function CommandPanel({ addCommandLog }) {
   const [commandStatus, setCommandStatus] = useState("No command sent");
 
   const buttonStyle = {
@@ -32,6 +32,7 @@ function CommandPanel() {
 
       if (!confirmed) {
         setCommandStatus(`${label} command cancelled`);
+        addCommandLog(`${label} command cancelled`);
         return;
       }
     }
@@ -39,8 +40,10 @@ function CommandPanel() {
     try {
       await commandFunction();
       setCommandStatus(`${label} command sent successfully`);
+      addCommandLog(`${label} command sent successfully`);
     } catch (error) {
       setCommandStatus(`${label} command failed`);
+      addCommandLog(`${label} command failed`);
     }
   };
 

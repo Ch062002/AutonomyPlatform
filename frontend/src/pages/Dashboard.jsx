@@ -9,8 +9,7 @@ import {
   getBackendStatus,
   getRos2Status,
   getPx4Status,
-  getGazeboStatus,
-  getTelemetry
+  getGazeboStatus
 } from "../services/api";
 
 function Dashboard() {
@@ -49,45 +48,34 @@ function Dashboard() {
         .catch(() => setGazeboStatus("Disconnected"));
     };
 
-    const fetchTelemetry = () => {
-      getTelemetry()
-        .then((response) => {
-          const data = response.data;
+    fetchSystemStatus();
+    const statusInterval = setInterval(fetchSystemStatus, 3000);
 
-          setTelemetry(data);
+    const telemetrySocket = new WebSocket("ws://127.0.0.1:8000/ws/telemetry");
 
-          setTelemetryHistory((prev) => {
-            const newPoint = {
-              time: new Date().toLocaleTimeString(),
-              altitude: Number(data.altitude),
-              velocity: Number(data.velocity),
-              battery: Number(data.battery)
-            };
+    telemetrySocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setTelemetry(data);
 
-            return [...prev.slice(-30), newPoint];
-          });
-        })
-        .catch(() => {
-          setTelemetry({
-            altitude: "--",
-            velocity: "--",
-            battery: "--",
-            flight_mode: "--",
-            arming_state: "--",
-            failsafe: false
-          });
-        });
+      setTelemetryHistory((prev) => {
+        const newPoint = {
+          time: new Date().toLocaleTimeString(),
+          altitude: Number(data.altitude),
+          velocity: Number(data.velocity),
+          battery: Number(data.battery)
+        };
+
+        return [...prev.slice(-30), newPoint];
+      });
     };
 
-    fetchSystemStatus();
-    fetchTelemetry();
-
-    const statusInterval = setInterval(fetchSystemStatus, 3000);
-    const telemetryInterval = setInterval(fetchTelemetry, 1000);
+    telemetrySocket.onerror = () => {
+      console.error("Telemetry WebSocket error");
+    };
 
     return () => {
       clearInterval(statusInterval);
-      clearInterval(telemetryInterval);
+      telemetrySocket.close();
     };
   }, []);
 

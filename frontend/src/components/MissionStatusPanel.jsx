@@ -1,5 +1,6 @@
-function MissionStatusPanel({ mission }) {
+function MissionStatusPanel({ mission, uploadStatus }) {
   const totalWaypoints = mission.waypoints.length;
+
   const progress =
     totalWaypoints === 0
       ? 0
@@ -18,18 +19,9 @@ function MissionStatusPanel({ mission }) {
           boxShadow: "0 0 15px rgba(59,130,246,0.15)"
         }}
       >
-        <p>
-          <strong>Mission Mode:</strong> {mission.state}
-        </p>
-
-        <p>
-          <strong>Active Waypoint:</strong> {mission.activeWaypoint} /{" "}
-          {totalWaypoints}
-        </p>
-
-        <p>
-          <strong>Mission Progress:</strong> {progress}%
-        </p>
+        <p><strong>Mission Mode:</strong> {mission.state}</p>
+        <p><strong>Active Waypoint:</strong> {mission.activeWaypoint} / {totalWaypoints}</p>
+        <p><strong>Mission Progress:</strong> {progress}%</p>
 
         <div
           style={{
@@ -37,7 +29,8 @@ function MissionStatusPanel({ mission }) {
             backgroundColor: "#0f172a",
             borderRadius: "10px",
             overflow: "hidden",
-            border: "1px solid #334155"
+            border: "1px solid #334155",
+            marginBottom: "1rem"
           }}
         >
           <div
@@ -48,6 +41,14 @@ function MissionStatusPanel({ mission }) {
             }}
           />
         </div>
+
+        <hr style={{ borderColor: "#334155" }} />
+
+        <p><strong>Upload Status:</strong> {uploadStatus?.status || "idle"}</p>
+        <p><strong>Message:</strong> {uploadStatus?.message || "No mission uploaded yet"}</p>
+        <p><strong>Uploaded Mission:</strong> {uploadStatus?.mission_name || "--"}</p>
+        <p><strong>Uploaded WPs:</strong> {uploadStatus?.waypoint_count || 0}</p>
+        <p><strong>Last Updated:</strong> {uploadStatus?.last_updated || "--"}</p>
       </div>
     </div>
   );

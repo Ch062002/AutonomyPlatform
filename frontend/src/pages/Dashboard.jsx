@@ -16,7 +16,8 @@ import {
   getBackendStatus,
   getRos2Status,
   getPx4Status,
-  getGazeboStatus
+  getGazeboStatus,
+  getMissionUploadStatus
 } from "../services/api";
 
 function Dashboard() {
@@ -24,6 +25,7 @@ function Dashboard() {
   const [ros2Status, setRos2Status] = useState("Checking...");
   const [px4Status, setPx4Status] = useState("Checking...");
   const [gazeboStatus, setGazeboStatus] = useState("Checking...");
+  const [uploadStatus, setUploadStatus] = useState(null);
 
   const [telemetry, setTelemetry] = useState({
     altitude: "--",
@@ -115,6 +117,7 @@ function Dashboard() {
       getRos2Status().then((r) => setRos2Status(r.data.status)).catch(() => setRos2Status("Disconnected"));
       getPx4Status().then((r) => setPx4Status(r.data.status)).catch(() => setPx4Status("Disconnected"));
       getGazeboStatus().then((r) => setGazeboStatus(r.data.status)).catch(() => setGazeboStatus("Disconnected"));
+      getMissionUploadStatus().then((r) => setUploadStatus(r.data)).catch(() => setUploadStatus(null));
     };
 
     fetchSystemStatus();
@@ -196,7 +199,7 @@ function Dashboard() {
               <MapPanel telemetry={telemetry} mission={mission} />
 
               <div style={{ marginTop: "2rem" }}>
-                <MissionStatusPanel mission={mission} />
+                <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
               </div>
 
               <div style={{ marginTop: "2rem" }}>

@@ -1,11 +1,20 @@
 import json
 import subprocess
+from datetime import datetime
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 
 router = APIRouter()
+
+latest_mission_status = {
+    "status": "idle",
+    "message": "No mission uploaded yet",
+    "mission_name": None,
+    "waypoint_count": 0,
+    "last_updated": None
+}
 
 
 class Waypoint(BaseModel):
@@ -21,6 +30,8 @@ class MissionUploadRequest(BaseModel):
 
 @router.post("/mission/upload")
 def upload_mission(mission: MissionUploadRequest):
+    global latest_mission_status
+
     try:
         mission_json = json.dumps(mission.model_dump())
 
@@ -33,14 +44,28 @@ def upload_mission(mission: MissionUploadRequest):
 
         subprocess.Popen(["bash", "-c", command])
 
-        return {
+        latest_mission_status = {
             "status": "success",
-            "message": "Mission uploaded to ROS2",
-            "mission": mission.model_dump()
+            "message": "Mission uploaded to ROS2 mission node",
+            "mission_name": mission.name,
+            "waypoint_count": len(mission.waypoints),
+            "last_updated": datetime.now().strftime("%H:%M:%S")
         }
 
+        return latest_mission_status
+
     except Exception as e:
-        return {
+        latest_mission_status = {
             "status": "error",
-            "message": str(e)
+            "message": str(e),
+            "mission_name": mission.name,
+            "waypoint_count": len(mission.waypoints),
+            "last_updated": datetime.now().strftime("%H:%M:%S")
         }
+
+        return latest_mission_status
+
+
+@router.get("/mission/upload/status")
+def get_mission_upload_status():
+    return latest_mission_status

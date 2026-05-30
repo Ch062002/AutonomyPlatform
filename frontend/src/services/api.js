@@ -61,3 +61,7 @@ export const holdVehicle = () => {
 export const uploadMission = (mission) => {
   return axios.post(`${API_BASE_URL}/mission/upload`, mission);
 };
+
+export const getMissionUploadStatus = () => {
+  return axios.get(`${API_BASE_URL}/mission/upload/status`);
+};

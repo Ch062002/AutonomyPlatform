@@ -61,3 +61,13 @@ def get_mission_progress():
 
     except Exception:
         return latest_progress
+
+def reset_mission_progress():
+    global mission_override_status
+
+    mission_override_status = {
+        "mission_state": "Idle",
+        "active_waypoint": 0,
+        "total_waypoints": 0,
+        "progress_percent": 0
+    }

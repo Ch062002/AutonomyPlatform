@@ -1,8 +1,11 @@
 import subprocess
+
 from fastapi import APIRouter
-from app.api.mission_progress import set_mission_aborted
+
+from app.api.mission_progress import set_mission_aborted, reset_mission_progress
 from app.api.mission_upload import reset_upload_status
-    
+
+
 router = APIRouter()
 
 
@@ -76,6 +79,7 @@ def offboard_vehicle():
     run_offboard_executor()
     return {"status": "success", "message": "OFFBOARD executor started"}
 
+
 @router.post("/command/stop-offboard")
 def stop_offboard_vehicle():
     subprocess.Popen([
@@ -84,15 +88,11 @@ def stop_offboard_vehicle():
         "pkill -f offboard_mission_executor"
     ])
 
-    return {
-        "status": "success",
-        "message": "OFFBOARD executor stopped"
-    }
+    return {"status": "success", "message": "OFFBOARD executor stopped"}
+
 
 @router.post("/command/abort-mission")
 def abort_mission():
-    set_mission_aborted()
-    reset_upload_status()
     subprocess.Popen([
         "bash",
         "-c",
@@ -104,7 +104,21 @@ def abort_mission():
         )
     ])
 
+    set_mission_aborted()
+    reset_upload_status()
+
     return {
         "status": "success",
         "message": "Mission aborted: OFFBOARD stopped and LAND command sent"
+    }
+
+
+@router.post("/mission/reset")
+def reset_mission_state():
+    reset_mission_progress()
+    reset_upload_status()
+
+    return {
+        "status": "success",
+        "message": "Mission state reset successfully"
     }

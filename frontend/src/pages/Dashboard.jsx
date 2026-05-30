@@ -10,6 +10,7 @@ import CommandLog from "../components/CommandLog";
 import VehicleHealthPanel from "../components/VehicleHealthPanel";
 import MapPanel from "../components/MapPanel";
 import MissionStatusPanel from "../components/MissionStatusPanel";
+import { uploadMission } from "../services/api";
 
 import {
   getBackendStatus,
@@ -30,18 +31,82 @@ function Dashboard() {
     battery: "--",
     flight_mode: "--",
     arming_state: "--",
-    failsafe: false
+    failsafe: false,
+    latitude: 47.3977,
+    longitude: 8.5456,
+    global_altitude: "--"
   });
 
   const [telemetryHistory, setTelemetryHistory] = useState([]);
   const [streamStatus, setStreamStatus] = useState("Connecting...");
   const [commandLogs, setCommandLogs] = useState([]);
 
+  const [mission, setMission] = useState({
+    name: "None",
+    state: "Idle",
+    activeWaypoint: 0,
+    waypoints: []
+  });
+
   const addCommandLog = (message) => {
     setCommandLogs((prev) => [
       { time: new Date().toLocaleTimeString(), message },
       ...prev.slice(0, 9)
     ]);
+  };
+
+  const createDemoMission = () => {
+    const lat = Number(telemetry.latitude) || 47.3977;
+    const lon = Number(telemetry.longitude) || 8.5456;
+
+    setMission({
+      name: "Demo Surveillance Mission",
+      state: "Created",
+      activeWaypoint: 0,
+      waypoints: [
+        { lat: lat + 0.0005, lon: lon + 0.0005, alt: 20 },
+        { lat: lat + 0.001, lon: lon - 0.0004, alt: 25 },
+        { lat: lat + 0.0002, lon: lon - 0.001, alt: 20 }
+      ]
+    });
+
+    addCommandLog("Demo mission created");
+  };
+
+  const resetMission = () => {
+    setMission({
+      name: "None",
+      state: "Idle",
+      activeWaypoint: 0,
+      waypoints: []
+    });
+
+    addCommandLog("Mission reset");
+  };
+
+  
+  const startMission = async () => {
+    if (mission.waypoints.length === 0) {
+      addCommandLog("Cannot start mission: no waypoints available");
+      return;
+    }
+
+    try {
+      await uploadMission({
+        name: mission.name,
+        waypoints: mission.waypoints
+      });
+
+      setMission((prev) => ({
+        ...prev,
+        state: "Running",
+        activeWaypoint: 1
+      }));
+
+      addCommandLog("Mission uploaded and started");
+    } catch {
+      addCommandLog("Mission upload failed");
+    }
   };
 
   useEffect(() => {
@@ -61,7 +126,7 @@ function Dashboard() {
 
     telemetrySocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setTelemetry(data);
+      setTelemetry((prev) => ({ ...prev, ...data }));
 
       setTelemetryHistory((prev) => [
         ...prev.slice(-30),
@@ -128,10 +193,10 @@ function Dashboard() {
             </div>
 
             <div>
-              <MapPanel telemetry={telemetry} />
+              <MapPanel telemetry={telemetry} mission={mission} />
 
               <div style={{ marginTop: "2rem" }}>
-                <MissionStatusPanel />
+                <MissionStatusPanel mission={mission} />
               </div>
 
               <div style={{ marginTop: "2rem" }}>
@@ -143,7 +208,12 @@ function Dashboard() {
               </div>
 
               <div style={{ marginTop: "2rem" }}>
-                <MissionPanel />
+                <MissionPanel
+                  mission={mission}
+                  createDemoMission={createDemoMission}
+                  resetMission={resetMission}
+                  startMission={startMission}
+                />
               </div>
             </div>
           </div>

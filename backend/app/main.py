@@ -13,6 +13,7 @@ from app.api.mission import router as mission_router
 
 from app.services.ros2_bridge import start_ros2_bridge
 import app.services.ros2_bridge as ros2_bridge
+from app.api.mission_upload import router as mission_upload_router
 
 
 app = FastAPI(
@@ -37,7 +38,7 @@ app.include_router(gazebo_router)
 app.include_router(telemetry_router)
 app.include_router(mission_router)
 app.include_router(command_router)
-
+app.include_router(mission_upload_router)
 
 @app.get("/")
 def root():

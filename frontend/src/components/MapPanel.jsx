@@ -36,7 +36,7 @@ function FollowDrone({ position }) {
   return null;
 }
 
-function MapPanel({ telemetry }) {
+function MapPanel({ telemetry, mission }) {
   const lat = Number(telemetry.latitude) || 47.3977;
   const lon = Number(telemetry.longitude) || 8.5456;
 
@@ -59,13 +59,8 @@ function MapPanel({ telemetry }) {
     });
   }, [lat, lon]);
 
-  const waypoints = [
-    [lat + 0.0005, lon + 0.0005],
-    [lat + 0.001, lon - 0.0004],
-    [lat + 0.0002, lon - 0.001]
-  ];
-
-  const missionPath = [dronePosition, ...waypoints];
+  const waypointPositions = mission.waypoints.map((wp) => [wp.lat, wp.lon]);
+  const missionPath = [dronePosition, ...waypointPositions];
 
   return (
     <div>
@@ -93,14 +88,16 @@ function MapPanel({ telemetry }) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          <Polyline
-            positions={missionPath}
-            pathOptions={{
-              color: "#22c55e",
-              weight: 3,
-              opacity: 0.7
-            }}
-          />
+          {waypointPositions.length > 0 && (
+            <Polyline
+              positions={missionPath}
+              pathOptions={{
+                color: "#22c55e",
+                weight: 3,
+                opacity: 0.7
+              }}
+            />
+          )}
 
           {trail.length > 1 && (
             <Polyline
@@ -117,9 +114,9 @@ function MapPanel({ telemetry }) {
             <Popup>
               <strong>PX4 SITL UAV</strong>
               <br />
-              Lat: {lat}
+              Lat: {lat.toFixed(7)}
               <br />
-              Lon: {lon}
+              Lon: {lon.toFixed(7)}
               <br />
               Altitude: {telemetry.altitude} m
               <br />
@@ -127,14 +124,16 @@ function MapPanel({ telemetry }) {
             </Popup>
           </Marker>
 
-          {waypoints.map((wp, index) => (
-            <Marker key={index} position={wp} icon={waypointIcon}>
+          {mission.waypoints.map((wp, index) => (
+            <Marker key={index} position={[wp.lat, wp.lon]} icon={waypointIcon}>
               <Popup>
                 <strong>Waypoint {index + 1}</strong>
                 <br />
-                Lat: {wp[0].toFixed(6)}
+                Lat: {wp.lat.toFixed(6)}
                 <br />
-                Lon: {wp[1].toFixed(6)}
+                Lon: {wp.lon.toFixed(6)}
+                <br />
+                Alt: {wp.alt} m
               </Popup>
             </Marker>
           ))}

@@ -57,3 +57,7 @@ export const rtlVehicle = () => {
 export const holdVehicle = () => {
   return axios.post(`${API_BASE_URL}/command/hold`);
 };
+
+export const uploadMission = (mission) => {
+  return axios.post(`${API_BASE_URL}/mission/upload`, mission);
+};

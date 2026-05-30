@@ -1,45 +1,18 @@
-import { useEffect, useState } from "react";
-import { getMission, createMission, resetMission } from "../services/api";
-
-function MissionPanel() {
-  const [mission, setMission] = useState({
-    name: "None",
-    state: "Idle",
-    waypoints: []
-  });
-
-  const fetchMission = () => {
-    getMission()
-      .then((response) => setMission(response.data))
-      .catch(() => {
-        setMission({
-          name: "Unavailable",
-          state: "Disconnected",
-          waypoints: []
-        });
-      });
+function MissionPanel({
+  mission,
+  createDemoMission,
+  resetMission,
+  startMission
+}) {
+  const buttonStyle = {
+    marginTop: "1rem",
+    marginRight: "0.8rem",
+    padding: "0.7rem 1.2rem",
+    borderRadius: "8px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold"
   };
-
-  const handleCreateMission = () => {
-    const newMission = {
-      name: "Demo Surveillance Mission",
-      waypoints: [
-        { lat: 18.5204, lon: 73.8567, alt: 100 },
-        { lat: 18.5210, lon: 73.8575, alt: 120 },
-        { lat: 18.5220, lon: 73.8580, alt: 110 }
-      ]
-    };
-
-    createMission(newMission).then(() => fetchMission());
-  };
-
-  const handleResetMission = () => {
-    resetMission().then(() => fetchMission());
-  };
-
-  useEffect(() => {
-    fetchMission();
-  }, []);
 
   return (
     <div>
@@ -60,27 +33,33 @@ function MissionPanel() {
           <p>Waypoint Count: {mission.waypoints.length}</p>
 
           <button
-            onClick={handleCreateMission}
+            onClick={createDemoMission}
             style={{
-              marginTop: "1rem",
-              padding: "0.7rem 1.2rem",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer"
+              ...buttonStyle,
+              backgroundColor: "#38bdf8",
+              color: "white"
             }}
           >
             Create Demo Mission
           </button>
 
           <button
-            onClick={handleResetMission}
+            onClick={startMission}
             style={{
-              marginTop: "1rem",
-              marginLeft: "1rem",
-              padding: "0.7rem 1.2rem",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer"
+              ...buttonStyle,
+              backgroundColor: "#22c55e",
+              color: "white"
+            }}
+          >
+            Start Mission
+          </button>
+
+          <button
+            onClick={resetMission}
+            style={{
+              ...buttonStyle,
+              backgroundColor: "#ef4444",
+              color: "white"
             }}
           >
             Reset Mission
@@ -96,7 +75,8 @@ function MissionPanel() {
             <ul>
               {mission.waypoints.map((wp, index) => (
                 <li key={index}>
-                  WP{index + 1}: Lat {wp.lat}, Lon {wp.lon}, Alt {wp.alt} m
+                  WP{index + 1}: Lat {wp.lat.toFixed(6)}, Lon{" "}
+                  {wp.lon.toFixed(6)}, Alt {wp.alt} m
                 </li>
               ))}
             </ul>

@@ -17,7 +17,8 @@ import {
   getRos2Status,
   getPx4Status,
   getGazeboStatus,
-  getMissionUploadStatus
+  getMissionUploadStatus,
+  getMissionProgress
 } from "../services/api";
 
 function Dashboard() {
@@ -137,6 +138,13 @@ function Dashboard() {
       getPx4Status().then((r) => setPx4Status(r.data.status)).catch(() => setPx4Status("Disconnected"));
       getGazeboStatus().then((r) => setGazeboStatus(r.data.status)).catch(() => setGazeboStatus("Disconnected"));
       getMissionUploadStatus().then((r) => setUploadStatus(r.data)).catch(() => setUploadStatus(null));
+      getMissionProgress().then((r) => {
+        setMission((prev) => ({
+          ...prev,
+          state: r.data.state,
+          activeWaypoint: r.data.active_waypoint
+        }));
+      }).catch(() => {});
     };
 
     fetchSystemStatus();

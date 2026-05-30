@@ -73,3 +73,7 @@ export const offboardVehicle = () => {
 export const stopOffboardVehicle = () => {
   return axios.post(`${API_BASE_URL}/command/stop-offboard`);
 };
+
+export const getMissionProgress = () => {
+  return axios.get(`${API_BASE_URL}/mission/progress`);
+};

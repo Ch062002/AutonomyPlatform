@@ -106,6 +106,25 @@ function Dashboard() {
       }));
 
       addCommandLog("Mission uploaded and started");
+
+      mission.waypoints.forEach((_, index) => {
+        setTimeout(() => {
+          const currentWaypoint = index + 1;
+          const isCompleted = currentWaypoint === mission.waypoints.length;
+
+          setMission((prev) => ({
+            ...prev,
+            activeWaypoint: currentWaypoint,
+            state: isCompleted ? "Completed" : "Running"
+          }));
+
+          addCommandLog(
+            isCompleted
+              ? "Mission completed"
+              : `Reached waypoint ${currentWaypoint}`
+          );
+        }, (index + 1) * 3000);
+      });
     } catch {
       addCommandLog("Mission upload failed");
     }

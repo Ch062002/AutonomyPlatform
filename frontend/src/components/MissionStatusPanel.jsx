@@ -35,12 +35,56 @@ function MissionStatusPanel({ mission, uploadStatus }) {
             style={{
               height: "100%",
               width: `${progress}%`,
-              backgroundColor: "#22c55e"
+              backgroundColor: "#22c55e",
+              transition: "0.4s"
             }}
           />
         </div>
 
-        <hr style={{ borderColor: "#334155" }} />
+        <h3>Waypoint Timeline</h3>
+
+        {mission.waypoints.length === 0 ? (
+          <p>No mission waypoints.</p>
+        ) : (
+          mission.waypoints.map((wp, index) => {
+            const wpNumber = index + 1;
+
+            let status = "Pending";
+            let color = "#94a3b8";
+
+            if (wpNumber < activeWaypoint) {
+              status = "Completed";
+              color = "#22c55e";
+            } else if (wpNumber === activeWaypoint && state === "Running") {
+              status = "Active";
+              color = "#38bdf8";
+            } else if (state === "Completed") {
+              status = "Completed";
+              color = "#22c55e";
+            }
+
+            return (
+              <div
+                key={index}
+                style={{
+                  marginTop: "0.7rem",
+                  padding: "0.7rem",
+                  backgroundColor: "#0f172a",
+                  borderRadius: "8px",
+                  border: `1px solid ${color}`
+                }}
+              >
+                <strong>WP{wpNumber}</strong>
+                <p style={{ color }}>{status}</p>
+                <small>
+                  Lat: {wp.lat.toFixed(6)}, Lon: {wp.lon.toFixed(6)}, Alt: {wp.alt} m
+                </small>
+              </div>
+            );
+          })
+        )}
+
+        <hr style={{ borderColor: "#334155", marginTop: "1rem" }} />
 
         <p><strong>Upload Status:</strong> {uploadStatus?.status || "idle"}</p>
         <p><strong>Message:</strong> {uploadStatus?.message || "No mission uploaded yet"}</p>

@@ -26,9 +26,24 @@ def set_mission_aborted():
     }
 
 
+def reset_mission_progress():
+    global mission_override_status
+    global latest_progress
+
+    mission_override_status = None
+
+    latest_progress = {
+        "mission_state": "Idle",
+        "active_waypoint": 0,
+        "total_waypoints": 0,
+        "progress_percent": 0
+    }
+
+
 @router.get("/mission/progress")
 def get_mission_progress():
     global mission_override_status
+    global latest_progress
 
     if mission_override_status is not None:
         return mission_override_status
@@ -54,20 +69,10 @@ def get_mission_progress():
 
             if line.startswith("data:"):
                 raw_data = line.replace("data:", "").strip().strip("'")
-                progress = json.loads(raw_data)
-                return progress
+                latest_progress = json.loads(raw_data)
+                return latest_progress
 
         return latest_progress
 
     except Exception:
         return latest_progress
-
-def reset_mission_progress():
-    global mission_override_status
-
-    mission_override_status = {
-        "mission_state": "Idle",
-        "active_waypoint": 0,
-        "total_waypoints": 0,
-        "progress_percent": 0
-    }

@@ -1,10 +1,15 @@
 import subprocess
+import threading
+import time
 
 from fastapi import APIRouter
 
 from app.api.mission_progress import set_mission_aborted, reset_mission_progress
-from app.api.mission_upload import reset_upload_status
-
+from app.api.mission_upload import (
+    reset_upload_status,
+    get_latest_uploaded_mission,
+    publish_mission_to_ros2
+)
 
 router = APIRouter()
 
@@ -36,6 +41,14 @@ def run_offboard_executor():
     )
 
     subprocess.Popen(["bash", "-c", full_command])
+
+
+def republish_latest_mission_after_delay():
+    time.sleep(2)
+    latest_mission = get_latest_uploaded_mission()
+
+    if latest_mission is not None:
+        publish_mission_to_ros2(latest_mission)
 
 
 @router.post("/command/arm")
@@ -76,18 +89,23 @@ def hold_vehicle():
 
 @router.post("/command/offboard")
 def offboard_vehicle():
+    reset_mission_progress()
     run_offboard_executor()
-    return {"status": "success", "message": "OFFBOARD executor started"}
+
+    threading.Thread(
+        target=republish_latest_mission_after_delay,
+        daemon=True
+    ).start()
+
+    return {
+        "status": "success",
+        "message": "OFFBOARD executor started and latest mission republished"
+    }
 
 
 @router.post("/command/stop-offboard")
 def stop_offboard_vehicle():
-    subprocess.Popen([
-        "bash",
-        "-c",
-        "pkill -f offboard_mission_executor"
-    ])
-
+    subprocess.Popen(["bash", "-c", "pkill -f offboard_mission_executor"])
     return {"status": "success", "message": "OFFBOARD executor stopped"}
 
 

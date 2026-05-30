@@ -18,7 +18,8 @@ import {
   getPx4Status,
   getGazeboStatus,
   getMissionUploadStatus,
-  getMissionProgress
+  getMissionProgress,
+  resetMissionState
 } from "../services/api";
 
 function Dashboard() {
@@ -78,15 +79,24 @@ function Dashboard() {
     addCommandLog("Demo mission created");
   };
 
-  const resetMission = () => {
-    setMission({
-      name: "None",
-      state: "Idle",
-      activeWaypoint: 0,
-      waypoints: []
-    });
+  const resetMission = async () => {
+    try {
+      await resetMissionState();
 
-    addCommandLog("Mission reset");
+      setMission({
+        name: "None",
+        state: "Idle",
+        activeWaypoint: 0,
+        totalWaypoints: 0,
+        progress: 0,
+        waypoints: []
+      });
+
+      setUploadStatus(null);
+      addCommandLog("Mission state reset");
+    } catch {
+      addCommandLog("Mission reset failed");
+    }
   };
 
   

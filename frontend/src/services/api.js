@@ -81,3 +81,8 @@ export const getMissionProgress = () => {
 export const abortMission = () => {
   return axios.post(`${API_BASE_URL}/command/abort-mission`);
 };
+
+
+export const resetMissionState = () => {
+  return axios.post(`${API_BASE_URL}/mission/reset`);
+};

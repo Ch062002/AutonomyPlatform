@@ -1,10 +1,8 @@
 function MissionStatusPanel({ mission, uploadStatus }) {
-  const totalWaypoints = mission.waypoints.length;
-
-  const progress =
-    totalWaypoints === 0
-      ? 0
-      : Math.round((mission.activeWaypoint / totalWaypoints) * 100);
+  const activeWaypoint = mission.activeWaypoint || 0;
+  const totalWaypoints = mission.totalWaypoints || mission.waypoints?.length || 0;
+  const progress = mission.progress || 0;
+  const state = mission.state || "Idle";
 
   return (
     <div>
@@ -19,8 +17,8 @@ function MissionStatusPanel({ mission, uploadStatus }) {
           boxShadow: "0 0 15px rgba(59,130,246,0.15)"
         }}
       >
-        <p><strong>Mission Mode:</strong> {mission.state}</p>
-        <p><strong>Active Waypoint:</strong> {mission.activeWaypoint} / {totalWaypoints}</p>
+        <p><strong>Mission Mode:</strong> {state}</p>
+        <p><strong>Active Waypoint:</strong> {activeWaypoint} / {totalWaypoints}</p>
         <p><strong>Mission Progress:</strong> {progress}%</p>
 
         <div

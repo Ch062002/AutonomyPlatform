@@ -48,6 +48,8 @@ function Dashboard() {
     name: "None",
     state: "Idle",
     activeWaypoint: 0,
+    totalWaypoints: 0,
+    progress: 0,
     waypoints: []
   });
 
@@ -102,30 +104,11 @@ function Dashboard() {
 
       setMission((prev) => ({
         ...prev,
-        state: "Running",
-        activeWaypoint: 1
+        state: "Uploaded",
+        activeWaypoint: 0
       }));
 
-      addCommandLog("Mission uploaded and started");
-
-      mission.waypoints.forEach((_, index) => {
-        setTimeout(() => {
-          const currentWaypoint = index + 1;
-          const isCompleted = currentWaypoint === mission.waypoints.length;
-
-          setMission((prev) => ({
-            ...prev,
-            activeWaypoint: currentWaypoint,
-            state: isCompleted ? "Completed" : "Running"
-          }));
-
-          addCommandLog(
-            isCompleted
-              ? "Mission completed"
-              : `Reached waypoint ${currentWaypoint}`
-          );
-        }, (index + 1) * 3000);
-      });
+      addCommandLog("Mission uploaded to ROS2. Start OFFBOARD to execute.");
     } catch {
       addCommandLog("Mission upload failed");
     }
@@ -138,14 +121,17 @@ function Dashboard() {
       getPx4Status().then((r) => setPx4Status(r.data.status)).catch(() => setPx4Status("Disconnected"));
       getGazeboStatus().then((r) => setGazeboStatus(r.data.status)).catch(() => setGazeboStatus("Disconnected"));
       getMissionUploadStatus().then((r) => setUploadStatus(r.data)).catch(() => setUploadStatus(null));
-      getMissionProgress().then((r) => {
-        setMission((prev) => ({
-          ...prev,
-          state: r.data.state,
-          activeWaypoint: r.data.active_waypoint
-        }));
-      }).catch(() => {});
-    };
+      getMissionProgress()
+        .then((r) => {
+          setMission((prev) => ({
+            ...prev,
+            state: r.data.mission_state,
+            activeWaypoint: r.data.active_waypoint,
+            totalWaypoints: r.data.total_waypoints,
+            progress: r.data.progress_percent
+          }));
+        })
+        .catch(() => {});
 
     fetchSystemStatus();
     const statusInterval = setInterval(fetchSystemStatus, 3000);

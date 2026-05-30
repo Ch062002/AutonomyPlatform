@@ -65,3 +65,11 @@ export const uploadMission = (mission) => {
 export const getMissionUploadStatus = () => {
   return axios.get(`${API_BASE_URL}/mission/upload/status`);
 };
+
+export const offboardVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/offboard`);
+};
+
+export const stopOffboardVehicle = () => {
+  return axios.post(`${API_BASE_URL}/command/stop-offboard`);
+};

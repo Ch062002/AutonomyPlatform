@@ -6,29 +6,28 @@ import {
   takeoffVehicle,
   landVehicle,
   rtlVehicle,
-  holdVehicle
+  holdVehicle,
+  offboardVehicle,
+  stopOffboardVehicle
 } from "../services/api";
 
 function CommandPanel({ addCommandLog }) {
   const [commandStatus, setCommandStatus] = useState("No command sent");
 
   const buttonStyle = {
-    padding: "0.8rem 1.4rem",
+    padding: "0.8rem 1.2rem",
     borderRadius: "8px",
     border: "none",
     cursor: "pointer",
-    marginRight: "1rem",
+    marginRight: "0.8rem",
     marginTop: "1rem",
     fontWeight: "bold",
-    transition: "0.2s",
-    boxShadow: "0 0 10px rgba(0,0,0,0.3)"
+    transition: "0.2s"
   };
 
   const sendCommand = async (commandFunction, label) => {
-    if (["TAKEOFF", "LAND", "RTL"].includes(label)) {
-      const confirmed = window.confirm(
-        `Are you sure you want to send ${label} command?`
-      );
+    if (["TAKEOFF", "LAND", "RTL", "OFFBOARD"].includes(label)) {
+      const confirmed = window.confirm(`Send ${label} command?`);
 
       if (!confirmed) {
         setCommandStatus(`${label} command cancelled`);
@@ -61,30 +60,15 @@ function CommandPanel({ addCommandLog }) {
           textAlign: "center"
         }}
       >
-        <button onClick={() => sendCommand(armVehicle, "ARM")} style={{ ...buttonStyle, backgroundColor: "#22c55e", color: "white" }}>
-          ARM
-        </button>
-
-        <button onClick={() => sendCommand(disarmVehicle, "DISARM")} style={{ ...buttonStyle, backgroundColor: "#ef4444", color: "white" }}>
-          DISARM
-        </button>
-
-        <button onClick={() => sendCommand(takeoffVehicle, "TAKEOFF")} style={{ ...buttonStyle, backgroundColor: "#38bdf8", color: "white" }}>
-          TAKEOFF
-        </button>
-
-        <button onClick={() => sendCommand(landVehicle, "LAND")} style={{ ...buttonStyle, backgroundColor: "#facc15", color: "black" }}>
-          LAND
-        </button>
-
-        <button onClick={() => sendCommand(holdVehicle, "HOLD")} style={{ ...buttonStyle, backgroundColor: "#a855f7", color: "white" }}>
-          HOLD
-        </button>
-
-        <button onClick={() => sendCommand(rtlVehicle, "RTL")} style={{ ...buttonStyle, backgroundColor: "#fb923c", color: "black" }}>
-          RTL
-        </button>
-
+        <button onClick={() => sendCommand(armVehicle, "ARM")} style={{ ...buttonStyle, backgroundColor: "#22c55e", color: "white" }}>ARM</button>
+        <button onClick={() => sendCommand(disarmVehicle, "DISARM")} style={{ ...buttonStyle, backgroundColor: "#ef4444", color: "white" }}>DISARM</button>
+        <button onClick={() => sendCommand(takeoffVehicle, "TAKEOFF")} style={{ ...buttonStyle, backgroundColor: "#38bdf8", color: "white" }}>TAKEOFF</button>
+        <button onClick={() => sendCommand(landVehicle, "LAND")} style={{ ...buttonStyle, backgroundColor: "#facc15", color: "black" }}>LAND</button>
+        <button onClick={() => sendCommand(holdVehicle, "HOLD")} style={{ ...buttonStyle, backgroundColor: "#a855f7", color: "white" }}>HOLD</button>
+        <button onClick={() => sendCommand(rtlVehicle, "RTL")} style={{ ...buttonStyle, backgroundColor: "#fb923c", color: "black" }}>RTL</button>
+        <button onClick={() => sendCommand(offboardVehicle, "OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#14b8a6", color: "white" }}>OFFBOARD</button>
+        <button onClick={() => sendCommand(stopOffboardVehicle, "STOP OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#64748b", color: "white" }}>STOP OFFBOARD</button>
+       
         <div
           style={{
             marginTop: "1.5rem",

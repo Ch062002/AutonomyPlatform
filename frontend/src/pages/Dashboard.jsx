@@ -116,11 +116,26 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchSystemStatus = () => {
-      getBackendStatus().then((r) => setBackendStatus(r.data.status)).catch(() => setBackendStatus("Disconnected"));
-      getRos2Status().then((r) => setRos2Status(r.data.status)).catch(() => setRos2Status("Disconnected"));
-      getPx4Status().then((r) => setPx4Status(r.data.status)).catch(() => setPx4Status("Disconnected"));
-      getGazeboStatus().then((r) => setGazeboStatus(r.data.status)).catch(() => setGazeboStatus("Disconnected"));
-      getMissionUploadStatus().then((r) => setUploadStatus(r.data)).catch(() => setUploadStatus(null));
+      getBackendStatus()
+        .then((r) => setBackendStatus(r.data.status))
+        .catch(() => setBackendStatus("Disconnected"));
+
+      getRos2Status()
+        .then((r) => setRos2Status(r.data.status))
+        .catch(() => setRos2Status("Disconnected"));
+
+      getPx4Status()
+        .then((r) => setPx4Status(r.data.status))
+        .catch(() => setPx4Status("Disconnected"));
+
+      getGazeboStatus()
+        .then((r) => setGazeboStatus(r.data.status))
+        .catch(() => setGazeboStatus("Disconnected"));
+
+      getMissionUploadStatus()
+        .then((r) => setUploadStatus(r.data))
+        .catch(() => setUploadStatus(null));
+
       getMissionProgress()
         .then((r) => {
           setMission((prev) => ({
@@ -132,8 +147,10 @@ function Dashboard() {
           }));
         })
         .catch(() => {});
+    };
 
     fetchSystemStatus();
+
     const statusInterval = setInterval(fetchSystemStatus, 3000);
 
     const telemetrySocket = new WebSocket("ws://localhost:8000/ws/telemetry");

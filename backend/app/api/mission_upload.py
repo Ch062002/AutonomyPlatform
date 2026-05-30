@@ -69,3 +69,14 @@ def upload_mission(mission: MissionUploadRequest):
 @router.get("/mission/upload/status")
 def get_mission_upload_status():
     return latest_mission_status
+
+def reset_upload_status():
+    global latest_mission_status
+
+    latest_mission_status = {
+        "status": "idle",
+        "message": "No mission uploaded yet",
+        "mission_name": None,
+        "waypoint_count": 0,
+        "last_updated": None
+    }

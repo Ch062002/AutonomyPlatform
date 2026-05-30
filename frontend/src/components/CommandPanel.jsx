@@ -8,7 +8,8 @@ import {
   rtlVehicle,
   holdVehicle,
   offboardVehicle,
-  stopOffboardVehicle
+  stopOffboardVehicle,
+  abortMission
 } from "../services/api";
 
 function CommandPanel({ addCommandLog }) {
@@ -68,7 +69,8 @@ function CommandPanel({ addCommandLog }) {
         <button onClick={() => sendCommand(rtlVehicle, "RTL")} style={{ ...buttonStyle, backgroundColor: "#fb923c", color: "black" }}>RTL</button>
         <button onClick={() => sendCommand(offboardVehicle, "OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#14b8a6", color: "white" }}>OFFBOARD</button>
         <button onClick={() => sendCommand(stopOffboardVehicle, "STOP OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#64748b", color: "white" }}>STOP OFFBOARD</button>
-       
+        <button onClick={() => sendCommand(abortMission, "ABORT MISSION")} style={{ ...buttonStyle, backgroundColor: "#dc2626", color: "white" }}>ABORT MISSION</button>
+        
         <div
           style={{
             marginTop: "1.5rem",

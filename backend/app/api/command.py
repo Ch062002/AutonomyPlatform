@@ -1,6 +1,8 @@
 import subprocess
 from fastapi import APIRouter
-
+from app.api.mission_progress import set_mission_aborted
+from app.api.mission_upload import reset_upload_status
+    
 router = APIRouter()
 
 
@@ -85,4 +87,24 @@ def stop_offboard_vehicle():
     return {
         "status": "success",
         "message": "OFFBOARD executor stopped"
+    }
+
+@router.post("/command/abort-mission")
+def abort_mission():
+    set_mission_aborted()
+    reset_upload_status()
+    subprocess.Popen([
+        "bash",
+        "-c",
+        (
+            "pkill -f offboard_mission_executor && "
+            "source /opt/ros/jazzy/setup.bash && "
+            "source ~/Aerospace/ROS2/autonomy_ws/install/setup.bash && "
+            "ros2 run px4_command_node command_node land"
+        )
+    ])
+
+    return {
+        "status": "success",
+        "message": "Mission aborted: OFFBOARD stopped and LAND command sent"
     }

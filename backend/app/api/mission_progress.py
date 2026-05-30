@@ -5,6 +5,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
+mission_override_status = None
 
 latest_progress = {
     "mission_state": "Idle",
@@ -14,8 +15,24 @@ latest_progress = {
 }
 
 
+def set_mission_aborted():
+    global mission_override_status
+
+    mission_override_status = {
+        "mission_state": "Aborted",
+        "active_waypoint": 0,
+        "total_waypoints": 0,
+        "progress_percent": 0
+    }
+
+
 @router.get("/mission/progress")
 def get_mission_progress():
+    global mission_override_status
+
+    if mission_override_status is not None:
+        return mission_override_status
+
     try:
         command = (
             "source /opt/ros/jazzy/setup.bash && "

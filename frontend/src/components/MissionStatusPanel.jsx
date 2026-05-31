@@ -1,22 +1,9 @@
 function MissionStatusPanel({ mission, uploadStatus }) {
-  const activeWaypoint = mission.activeWaypoint || 0;
-  const totalWaypoints =
-    mission.totalWaypoints || mission.waypoints?.length || 0;
-
-  const progress = mission.progress || 0;
-  const state = mission.state || "Idle";
-
-  const getStateColor = (state) => {
-    if (state === "Running") return "#38bdf8";
-    if (state === "Paused") return "#f97316";
-    if (state === "Completed") return "#22c55e";
-    if (state === "Aborted") return "#ef4444";
-    return "#94a3b8";
-  };
-
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Mission Status</h2>
+      <h2 style={{ textAlign: "center" }}>
+        Mission Status
+      </h2>
 
       <div
         style={{
@@ -24,144 +11,196 @@ function MissionStatusPanel({ mission, uploadStatus }) {
           padding: "1rem",
           borderRadius: "14px",
           border: "1px solid #334155",
-          boxShadow: "0 0 15px rgba(59,130,246,0.15)"
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)",
+          color: "white"
         }}
       >
+        {/* MISSION OVERVIEW */}
+
         <p>
           <strong>Mission Mode:</strong>{" "}
           <span
             style={{
-              color: getStateColor(state),
+              color:
+                mission?.state === "Completed"
+                  ? "#4ade80"
+                  : "#60a5fa",
               fontWeight: "bold"
             }}
           >
-            {state}
+            {mission?.state || "Idle"}
           </span>
         </p>
 
         <p>
           <strong>Active Waypoint:</strong>{" "}
-          {activeWaypoint} / {totalWaypoints}
+          {mission?.activeWaypoint || 0} /{" "}
+          {mission?.totalWaypoints || 0}
         </p>
 
         <p>
-          <strong>Mission Progress:</strong> {progress}%
-        </p>
-        
-        <p>
-        <strong>Guidance Mode:</strong>{" "}
-        {mission.guidanceMode || "DIRECT_WAYPOINT"}
+          <strong>Mission Progress:</strong>{" "}
+          {mission?.progress || 0}%
         </p>
 
         <p>
-        <strong>Cross-Track Error:</strong>{" "}
-        {mission.crossTrackError ?? "--"} m
+          <strong>Guidance Mode:</strong>{" "}
+          {mission?.guidanceMode || "DIRECT_WAYPOINT"}
         </p>
 
-        <p>
-        <strong>Along-Track Distance:</strong>{" "}
-        {mission.alongTrackDistance ?? "--"} m
-        </p>
+        {/* LOS GUIDANCE METRICS */}
 
-        <p>
-        <strong>Path Length:</strong>{" "}
-        {mission.pathLength ?? "--"} m
-        </p>
+        {mission?.guidanceMode === "LOS_GUIDANCE" && (
+          <>
+            <p>
+              <strong>Cross-Track Error:</strong>{" "}
+              {mission?.crossTrackError ?? "--"} m
+            </p>
+
+            <p>
+              <strong>Along-Track Distance:</strong>{" "}
+              {mission?.alongTrackDistance ?? "--"} m
+            </p>
+
+            <p>
+              <strong>Path Length:</strong>{" "}
+              {mission?.pathLength ?? "--"} m
+            </p>
+          </>
+        )}
+
+        {/* DIRECT WAYPOINT METRICS */}
+
+        {mission?.guidanceMode === "DIRECT_WAYPOINT" && (
+          <>
+            <p>
+              <strong>Distance To Target:</strong>{" "}
+              {mission?.distanceToTarget ?? "--"} m
+            </p>
+
+            <p>
+              <strong>Bearing To Target:</strong>{" "}
+              {mission?.bearingToTarget ?? "--"}°
+            </p>
+
+            <p>
+              <strong>Altitude Error:</strong>{" "}
+              {mission?.altitudeError ?? "--"} m
+            </p>
+          </>
+        )}
+
+        {/* PROGRESS BAR */}
 
         <div
           style={{
-            height: "10px",
+            width: "100%",
+            height: "8px",
             backgroundColor: "#0f172a",
-            borderRadius: "10px",
-            overflow: "hidden",
-            border: "1px solid #334155",
+            borderRadius: "8px",
+            marginTop: "1rem",
             marginBottom: "1rem"
           }}
         >
           <div
             style={{
+              width: `${mission?.progress || 0}%`,
               height: "100%",
-              width: `${progress}%`,
-              backgroundColor: getStateColor(state),
-              transition: "0.4s"
+              backgroundColor: "#60a5fa",
+              borderRadius: "8px",
+              transition: "0.3s"
             }}
           />
         </div>
 
+        {/* POSITION DATA */}
+
         <p>
           <strong>Distance to WP:</strong>{" "}
-          {mission.distanceToWaypoint ?? "--"} m
+          {mission?.distanceToWaypoint ?? "--"} m
         </p>
 
         <p>
           <strong>Current Position:</strong>{" "}
-          {mission.currentPosition
-            ? `[${mission.currentPosition.join(", ")}]`
+          {mission?.currentPosition
+            ? JSON.stringify(mission.currentPosition)
             : "--"}
         </p>
 
         <p>
           <strong>Target Position:</strong>{" "}
-          {mission.targetPosition
-            ? `[${mission.targetPosition.join(", ")}]`
+          {mission?.targetPosition
+            ? JSON.stringify(mission.targetPosition)
             : "--"}
         </p>
 
-        <h3 style={{ marginTop: "1rem" }}>Waypoint Timeline</h3>
+        {/* WAYPOINT TIMELINE */}
 
-        {mission.waypoints.length === 0 ? (
-          <p>No mission waypoints.</p>
-        ) : (
-          mission.waypoints.map((wp, index) => {
-            const wpNumber = index + 1;
+        <h3
+          style={{
+            marginTop: "1.5rem"
+          }}
+        >
+          Waypoint Timeline
+        </h3>
 
-            let status = "Pending";
-            let color = "#94a3b8";
+        {mission?.waypoints?.map((wp, index) => {
+          let status = "Pending";
 
-            if (wpNumber < activeWaypoint) {
-              status = "Completed";
-              color = "#22c55e";
-            } else if (wpNumber === activeWaypoint && state === "Running") {
-              status = "Active";
-              color = "#38bdf8";
-            } else if (wpNumber === activeWaypoint && state === "Paused") {
-              status = "Paused";
-              color = "#f97316";
-            } else if (state === "Completed") {
-              status = "Completed";
-              color = "#22c55e";
-            }
+          if (mission?.state === "Completed") {
+            status = "Completed";
+          } else if (index + 1 < mission.activeWaypoint) {
+            status = "Completed";
+          } else if (index + 1 === mission.activeWaypoint) {
+            status = "Active";
+          }
 
-            return (
-              <div
-                key={index}
+          return (
+            <div
+              key={index}
+              style={{
+                marginTop: "0.8rem",
+                padding: "0.8rem",
+                borderRadius: "10px",
+                border: "1px solid #475569",
+                backgroundColor: "#0f172a"
+              }}
+            >
+              <p>
+                <strong>WP{index + 1}</strong>
+              </p>
+
+              <p
                 style={{
-                  marginTop: "0.7rem",
-                  padding: "0.7rem",
-                  backgroundColor: "#0f172a",
-                  borderRadius: "8px",
-                  border: `1px solid ${color}`
+                  color:
+                    status === "Completed"
+                      ? "#4ade80"
+                      : status === "Active"
+                      ? "#60a5fa"
+                      : "#94a3b8"
                 }}
               >
-                <strong>WP{wpNumber}</strong>
+                {status}
+              </p>
 
-                <p style={{ color, fontWeight: "bold" }}>
-                  {status}
-                </p>
+              <p
+                style={{
+                  fontSize: "0.8rem"
+                }}
+              >
+                Lat: {wp.lat}, Lon: {wp.lon}, Alt: {wp.alt} m
+              </p>
+            </div>
+          );
+        })}
 
-                <small>
-                  Lat: {wp.lat.toFixed(6)}, Lon:{" "}
-                  {wp.lon.toFixed(6)}, Alt: {wp.alt} m
-                </small>
-              </div>
-            );
-          })
-        )}
+        {/* UPLOAD INFO */}
 
         <hr
           style={{
-            borderColor: "#334155",
-            marginTop: "1rem"
+            marginTop: "1rem",
+            marginBottom: "1rem",
+            borderColor: "#334155"
           }}
         />
 
@@ -172,7 +211,8 @@ function MissionStatusPanel({ mission, uploadStatus }) {
 
         <p>
           <strong>Message:</strong>{" "}
-          {uploadStatus?.message || "No mission uploaded yet"}
+          {uploadStatus?.message ||
+            "No mission uploaded yet"}
         </p>
 
         <p>

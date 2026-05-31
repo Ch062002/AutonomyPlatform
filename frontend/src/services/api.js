@@ -94,3 +94,7 @@ export const pauseMission = () => {
 export const resumeMission = () => {
   return axios.post(`${API_BASE_URL}/mission/resume`);
 };
+
+export const setGuidanceMode = (mode) => {
+  return axios.post(`${API_BASE_URL}/guidance/mode/${mode}`);
+};

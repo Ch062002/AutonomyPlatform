@@ -56,6 +56,15 @@ def republish_latest_mission_after_delay():
     if latest_mission is not None:
         publish_mission_to_ros2(latest_mission)
 
+def publish_guidance_mode(mode):
+    full_command = (
+        "source /opt/ros/jazzy/setup.bash && "
+        "source ~/Aerospace/ROS2/autonomy_ws/install/setup.bash && "
+        f"ros2 topic pub --once /guidance_mode std_msgs/msg/String "
+        f"'{{data: \"{mode}\"}}'"
+    )
+
+    subprocess.Popen(["bash", "-c", full_command])
 
 def publish_mission_control(command_text):
     full_command = (
@@ -211,4 +220,13 @@ def resume_mission():
     return {
         "status": "success",
         "message": "Mission resume command sent"
+    }
+
+@router.post("/guidance/mode/{mode}")
+def set_guidance_mode(mode: str):
+    publish_guidance_mode(mode.upper())
+
+    return {
+        "status": "success",
+        "message": f"Guidance mode set to {mode.upper()}"
     }

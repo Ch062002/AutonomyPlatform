@@ -111,6 +111,9 @@ def get_mission_progress():
             latest_progress["cross_track_error"] = guidance_data.get("cross_track_error")
             latest_progress["along_track_distance"] = guidance_data.get("along_track_distance")
             latest_progress["path_length"] = guidance_data.get("path_length")
+            latest_progress["distance_to_target"] = guidance_data.get("distance_to_target")
+            latest_progress["bearing_to_target"] = guidance_data.get("bearing_to_target")
+            latest_progress["altitude_error"] = guidance_data.get("altitude_error")
 
             if "guidance_error" in guidance_data:
                 latest_progress["guidance_error"] = guidance_data["guidance_error"]

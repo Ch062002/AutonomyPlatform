@@ -11,6 +11,7 @@ import VehicleHealthPanel from "../components/VehicleHealthPanel";
 import MapPanel from "../components/MapPanel";
 import MissionStatusPanel from "../components/MissionStatusPanel";
 import { uploadMission } from "../services/api";
+import GuidanceModePanel from "../components/GuidanceModePanel";
 
 import {
   getBackendStatus,
@@ -160,7 +161,10 @@ function Dashboard() {
             guidanceMode: r.data.guidance_mode,
             crossTrackError: r.data.cross_track_error,
             alongTrackDistance: r.data.along_track_distance,
-            pathLength: r.data.path_length
+            pathLength: r.data.path_length,
+            distanceToTarget: r.data.distance_to_target,
+            bearingToTarget: r.data.bearing_to_target,
+            altitudeError: r.data.altitude_error,
           }));
         })
         .catch(() => {});
@@ -244,6 +248,10 @@ function Dashboard() {
 
             <div>
               <MapPanel telemetry={telemetry} mission={mission} />
+              
+              <div style={{ marginTop: "2rem" }}>
+                <GuidanceModePanel addCommandLog={addCommandLog} />
+              </div>
 
               <div style={{ marginTop: "2rem" }}>
                 <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />

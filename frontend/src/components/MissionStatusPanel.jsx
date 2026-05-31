@@ -47,6 +47,26 @@ function MissionStatusPanel({ mission, uploadStatus }) {
         <p>
           <strong>Mission Progress:</strong> {progress}%
         </p>
+        
+        <p>
+        <strong>Guidance Mode:</strong>{" "}
+        {mission.guidanceMode || "DIRECT_WAYPOINT"}
+        </p>
+
+        <p>
+        <strong>Cross-Track Error:</strong>{" "}
+        {mission.crossTrackError ?? "--"} m
+        </p>
+
+        <p>
+        <strong>Along-Track Distance:</strong>{" "}
+        {mission.alongTrackDistance ?? "--"} m
+        </p>
+
+        <p>
+        <strong>Path Length:</strong>{" "}
+        {mission.pathLength ?? "--"} m
+        </p>
 
         <div
           style={{

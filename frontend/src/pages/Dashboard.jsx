@@ -156,7 +156,11 @@ function Dashboard() {
             progress: r.data.progress_percent,
             distanceToWaypoint: r.data.distance_to_waypoint,
             currentPosition: r.data.current_position,
-            targetPosition: r.data.target_position
+            targetPosition: r.data.target_position,
+            guidanceMode: r.data.guidance_mode,
+            crossTrackError: r.data.cross_track_error,
+            alongTrackDistance: r.data.along_track_distance,
+            pathLength: r.data.path_length
           }));
         })
         .catch(() => {});

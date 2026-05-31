@@ -165,6 +165,9 @@ function Dashboard() {
             distanceToTarget: r.data.distance_to_target,
             bearingToTarget: r.data.bearing_to_target,
             altitudeError: r.data.altitude_error,
+            lookaheadDistance: r.data.lookahead_distance,
+            pursuitDistance: r.data.pursuit_distance,
+            pursuitHeading: r.data.pursuit_heading,
           }));
         })
         .catch(() => {});

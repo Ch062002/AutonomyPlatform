@@ -69,6 +69,15 @@ function MissionStatusPanel({ mission, uploadStatus }) {
           </>
         )}
 
+        {/* PURE PURSUIT METRICS */}
+        {mission?.guidanceMode === "PURE_PURSUIT" && (
+  <>
+            <p><strong>Lookahead Distance:</strong> {mission?.lookaheadDistance ?? "--"} m</p>
+            <p><strong>Pursuit Distance:</strong> {mission?.pursuitDistance ?? "--"} m</p>
+            <p><strong>Pursuit Heading:</strong> {mission?.pursuitHeading ?? "--"}°</p>
+        </>
+        )}
+
         {/* DIRECT WAYPOINT METRICS */}
 
         {mission?.guidanceMode === "DIRECT_WAYPOINT" && (

@@ -114,6 +114,9 @@ def get_mission_progress():
             latest_progress["distance_to_target"] = guidance_data.get("distance_to_target")
             latest_progress["bearing_to_target"] = guidance_data.get("bearing_to_target")
             latest_progress["altitude_error"] = guidance_data.get("altitude_error")
+            latest_progress["lookahead_distance"] = guidance_data.get("lookahead_distance")
+            latest_progress["pursuit_distance"] = guidance_data.get("pursuit_distance")
+            latest_progress["pursuit_heading"] = guidance_data.get("pursuit_heading")
 
             if "guidance_error" in guidance_data:
                 latest_progress["guidance_error"] = guidance_data["guidance_error"]

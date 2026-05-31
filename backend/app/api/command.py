@@ -4,7 +4,12 @@ import time
 
 from fastapi import APIRouter
 
-from app.api.mission_progress import set_mission_aborted, reset_mission_progress
+from app.api.mission_progress import (
+    set_mission_aborted,
+    set_mission_landing,
+    reset_mission_progress
+)
+
 from app.api.mission_upload import (
     reset_upload_status,
     get_latest_uploaded_mission,
@@ -42,6 +47,16 @@ def run_offboard_executor():
 
     subprocess.Popen(["bash", "-c", full_command])
 
+
+def republish_latest_mission_after_delay():
+    time.sleep(2)
+
+    latest_mission = get_latest_uploaded_mission()
+
+    if latest_mission is not None:
+        publish_mission_to_ros2(latest_mission)
+
+
 def publish_mission_control(command_text):
     full_command = (
         "source /opt/ros/jazzy/setup.bash && "
@@ -52,53 +67,73 @@ def publish_mission_control(command_text):
 
     subprocess.Popen(["bash", "-c", full_command])
 
-def republish_latest_mission_after_delay():
-    time.sleep(2)
-    latest_mission = get_latest_uploaded_mission()
-
-    if latest_mission is not None:
-        publish_mission_to_ros2(latest_mission)
-
 
 @router.post("/command/arm")
 def arm_vehicle():
     run_command("arm")
-    return {"status": "success", "message": "ARM command sent"}
+
+    return {
+        "status": "success",
+        "message": "ARM command sent"
+    }
 
 
 @router.post("/command/disarm")
 def disarm_vehicle():
     run_command("disarm")
-    return {"status": "success", "message": "DISARM command sent"}
+
+    return {
+        "status": "success",
+        "message": "DISARM command sent"
+    }
 
 
 @router.post("/command/takeoff")
 def takeoff_vehicle():
     run_command("takeoff")
-    return {"status": "success", "message": "TAKEOFF command sent"}
+
+    return {
+        "status": "success",
+        "message": "TAKEOFF command sent"
+    }
 
 
 @router.post("/command/land")
 def land_vehicle():
+    set_mission_landing()
+
     run_command("land")
-    return {"status": "success", "message": "LAND command sent"}
+
+    return {
+        "status": "success",
+        "message": "LAND command sent"
+    }
 
 
 @router.post("/command/rtl")
 def rtl_vehicle():
     run_command("rtl")
-    return {"status": "success", "message": "RTL command sent"}
+
+    return {
+        "status": "success",
+        "message": "RTL command sent"
+    }
 
 
 @router.post("/command/hold")
 def hold_vehicle():
     run_command("hold")
-    return {"status": "success", "message": "HOLD command sent"}
+
+    return {
+        "status": "success",
+        "message": "HOLD command sent"
+    }
 
 
 @router.post("/command/offboard")
 def offboard_vehicle():
     reset_mission_progress()
+
     run_offboard_executor()
 
     threading.Thread(
@@ -114,8 +149,16 @@ def offboard_vehicle():
 
 @router.post("/command/stop-offboard")
 def stop_offboard_vehicle():
-    subprocess.Popen(["bash", "-c", "pkill -f offboard_mission_executor"])
-    return {"status": "success", "message": "OFFBOARD executor stopped"}
+    subprocess.Popen([
+        "bash",
+        "-c",
+        "pkill -f offboard_mission_executor"
+    ])
+
+    return {
+        "status": "success",
+        "message": "OFFBOARD executor stopped"
+    }
 
 
 @router.post("/command/abort-mission")
@@ -150,13 +193,22 @@ def reset_mission_state():
         "message": "Mission state reset successfully"
     }
 
+
 @router.post("/mission/pause")
 def pause_mission():
     publish_mission_control("pause")
-    return {"status": "success", "message": "Mission pause command sent"}
+
+    return {
+        "status": "success",
+        "message": "Mission pause command sent"
+    }
 
 
 @router.post("/mission/resume")
 def resume_mission():
     publish_mission_control("resume")
-    return {"status": "success", "message": "Mission resume command sent"}
+
+    return {
+        "status": "success",
+        "message": "Mission resume command sent"
+    }

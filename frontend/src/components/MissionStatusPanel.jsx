@@ -20,6 +20,17 @@ function MissionStatusPanel({ mission, uploadStatus }) {
         <p><strong>Mission Mode:</strong> {state}</p>
         <p><strong>Active Waypoint:</strong> {activeWaypoint} / {totalWaypoints}</p>
         <p><strong>Mission Progress:</strong> {progress}%</p>
+        <p><strong>Distance to WP:</strong> {mission.distanceToWaypoint ?? "--"} m</p>
+
+        <p>
+        <strong>Current Position:</strong>{" "}
+        {mission.currentPosition ? `[${mission.currentPosition.join(", ")}]` : "--"}
+        </p>
+
+        <p>
+        <strong>Target Position:</strong>{" "}
+        {mission.targetPosition ? `[${mission.targetPosition.join(", ")}]` : "--"}
+        </p>
 
         <div
           style={{

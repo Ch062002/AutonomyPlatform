@@ -153,7 +153,10 @@ function Dashboard() {
             state: r.data.mission_state,
             activeWaypoint: r.data.active_waypoint,
             totalWaypoints: r.data.total_waypoints,
-            progress: r.data.progress_percent
+            progress: r.data.progress_percent,
+            distanceToWaypoint: r.data.distance_to_waypoint,
+            currentPosition: r.data.current_position,
+            targetPosition: r.data.target_position
           }));
         })
         .catch(() => {});

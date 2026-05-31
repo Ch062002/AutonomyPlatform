@@ -86,3 +86,11 @@ export const abortMission = () => {
 export const resetMissionState = () => {
   return axios.post(`${API_BASE_URL}/mission/reset`);
 };
+
+export const pauseMission = () => {
+  return axios.post(`${API_BASE_URL}/mission/pause`);
+};
+
+export const resumeMission = () => {
+  return axios.post(`${API_BASE_URL}/mission/resume`);
+};

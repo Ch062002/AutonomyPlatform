@@ -9,7 +9,9 @@ import {
   holdVehicle,
   offboardVehicle,
   stopOffboardVehicle,
-  abortMission
+  abortMission,
+  pauseMission,
+  resumeMission
 } from "../services/api";
 
 function CommandPanel({ addCommandLog }) {
@@ -70,6 +72,8 @@ function CommandPanel({ addCommandLog }) {
         <button onClick={() => sendCommand(offboardVehicle, "OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#14b8a6", color: "white" }}>OFFBOARD</button>
         <button onClick={() => sendCommand(stopOffboardVehicle, "STOP OFFBOARD")} style={{ ...buttonStyle, backgroundColor: "#64748b", color: "white" }}>STOP OFFBOARD</button>
         <button onClick={() => sendCommand(abortMission, "ABORT MISSION")} style={{ ...buttonStyle, backgroundColor: "#dc2626", color: "white" }}>ABORT MISSION</button>
+        <button onClick={() => sendCommand(pauseMission, "PAUSE MISSION")} style={{ ...buttonStyle, backgroundColor: "#f59e0b", color: "black" }}>PAUSE MISSION</button>
+        <button onClick={() => sendCommand(resumeMission, "RESUME MISSION")} style={{ ...buttonStyle, backgroundColor: "#10b981", color: "white" }}>RESUME MISSION</button>
         
         <div
           style={{

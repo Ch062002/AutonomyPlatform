@@ -42,6 +42,15 @@ def run_offboard_executor():
 
     subprocess.Popen(["bash", "-c", full_command])
 
+def publish_mission_control(command_text):
+    full_command = (
+        "source /opt/ros/jazzy/setup.bash && "
+        "source ~/Aerospace/ROS2/autonomy_ws/install/setup.bash && "
+        f"ros2 topic pub --once /mission_control std_msgs/msg/String "
+        f"'{{data: \"{command_text}\"}}'"
+    )
+
+    subprocess.Popen(["bash", "-c", full_command])
 
 def republish_latest_mission_after_delay():
     time.sleep(2)
@@ -140,3 +149,14 @@ def reset_mission_state():
         "status": "success",
         "message": "Mission state reset successfully"
     }
+
+@router.post("/mission/pause")
+def pause_mission():
+    publish_mission_control("pause")
+    return {"status": "success", "message": "Mission pause command sent"}
+
+
+@router.post("/mission/resume")
+def resume_mission():
+    publish_mission_control("resume")
+    return {"status": "success", "message": "Mission resume command sent"}

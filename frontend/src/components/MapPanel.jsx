@@ -1,159 +1,92 @@
-import "leaflet/dist/leaflet.css";
-
-import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
-  Polyline,
-  useMap
+  Polyline
 } from "react-leaflet";
 
-import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const droneIcon = L.divIcon({
-  html: "🚁",
-  className: "drone-marker",
-  iconSize: [30, 30],
-  iconAnchor: [15, 15]
-});
-
-const waypointIcon = L.divIcon({
-  html: "📍",
-  className: "waypoint-marker",
-  iconSize: [28, 28],
-  iconAnchor: [14, 28]
-});
-
-function FollowDrone({ position }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(position, map.getZoom());
-  }, [position, map]);
-
-  return null;
-}
+import GuidanceOverlay from "./GuidanceOverlay";
 
 function MapPanel({ telemetry, mission }) {
-  const lat = Number(telemetry.latitude) || 47.3977;
-  const lon = Number(telemetry.longitude) || 8.5456;
+  const defaultCenter = [47.3977, 8.5456];
 
-  const dronePosition = [lat, lon];
-  const [trail, setTrail] = useState([]);
+  const currentPosition =
+    telemetry?.latitude && telemetry?.longitude
+      ? [telemetry.latitude, telemetry.longitude]
+      : defaultCenter;
 
-  useEffect(() => {
-    setTrail((prev) => {
-      const lastPoint = prev[prev.length - 1];
-
-      if (
-        lastPoint &&
-        Math.abs(lastPoint[0] - lat) < 0.000001 &&
-        Math.abs(lastPoint[1] - lon) < 0.000001
-      ) {
-        return prev;
-      }
-
-      return [...prev.slice(-80), dronePosition];
-    });
-  }, [lat, lon]);
-
-  const waypointPositions = mission.waypoints.map((wp) => [wp.lat, wp.lon]);
-  const missionPath = [dronePosition, ...waypointPositions];
+  const missionWaypoints =
+    mission?.waypoints?.map((wp) => [wp.lat, wp.lon]) || [];
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Live Map & Trajectory</h2>
+      <h2 style={{ textAlign: "center" }}>
+        Mission Map
+      </h2>
 
       <div
         style={{
-          height: "420px",
-          backgroundColor: "#1e293b",
           borderRadius: "14px",
+          overflow: "hidden",
           border: "1px solid #334155",
-          boxShadow: "0 0 15px rgba(59,130,246,0.15)",
-          overflow: "hidden"
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)"
         }}
       >
         <MapContainer
-          center={dronePosition}
-          zoom={17}
-          style={{ height: "100%", width: "100%" }}
+          center={currentPosition}
+          zoom={16}
+          style={{
+            height: "500px",
+            width: "100%"
+          }}
         >
-          <FollowDrone position={dronePosition} />
-
           <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
+            attribution='&copy; OpenStreetMap contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {waypointPositions.length > 0 && (
-            <Polyline
-              positions={missionPath}
-              pathOptions={{
-                color: "#22c55e",
-                weight: 3,
-                opacity: 0.7
-              }}
-            />
-          )}
+          {/* UAV Marker */}
 
-          {trail.length > 1 && (
-            <Polyline
-              positions={trail}
-              pathOptions={{
-                color: "#38bdf8",
-                weight: 4,
-                opacity: 0.9
-              }}
-            />
-          )}
-
-          <Marker position={dronePosition} icon={droneIcon}>
+          <Marker position={currentPosition}>
             <Popup>
-              <strong>PX4 SITL UAV</strong>
-              <br />
-              Lat: {lat.toFixed(7)}
-              <br />
-              Lon: {lon.toFixed(7)}
-              <br />
-              Altitude: {telemetry.altitude} m
-              <br />
-              Mode: {telemetry.flight_mode}
+              UAV Current Position
             </Popup>
           </Marker>
 
-          {mission.waypoints.map((wp, index) => (
-            <Marker key={index} position={[wp.lat, wp.lon]} icon={waypointIcon}>
+          {/* Mission Path */}
+
+          {missionWaypoints.length > 1 && (
+            <Polyline
+              positions={missionWaypoints}
+              pathOptions={{
+                color: "#60a5fa",
+                weight: 4
+              }}
+            />
+          )}
+
+          {/* Waypoint Markers */}
+
+          {mission?.waypoints?.map((wp, index) => (
+            <Marker
+              key={index}
+              position={[wp.lat, wp.lon]}
+            >
               <Popup>
-                <strong>Waypoint {index + 1}</strong>
+                WP{index + 1}
                 <br />
-                Lat: {wp.lat.toFixed(6)}
-                <br />
-                Lon: {wp.lon.toFixed(6)}
-                <br />
-                Alt: {wp.alt} m
+                Altitude: {wp.alt} m
               </Popup>
             </Marker>
           ))}
-        </MapContainer>
-      </div>
 
-      <div
-        style={{
-          marginTop: "0.8rem",
-          backgroundColor: "#1e293b",
-          padding: "0.8rem",
-          borderRadius: "10px",
-          border: "1px solid #334155",
-          textAlign: "center"
-        }}
-      >
-        <strong>Live Position:</strong>
-        <p>Lat: {lat.toFixed(7)}</p>
-        <p>Lon: {lon.toFixed(7)}</p>
-        <p>Global Altitude: {telemetry.global_altitude} m</p>
+          {/* Guidance Overlay */}
+
+          <GuidanceOverlay mission={mission} />
+        </MapContainer>
       </div>
     </div>
   );

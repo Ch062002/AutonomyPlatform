@@ -121,6 +121,12 @@ def get_mission_progress():
             latest_progress["path_heading"] = guidance_data.get("path_heading")
             latest_progress["field_strength"] = guidance_data.get("field_strength")
             latest_progress["convergence_gain"] = guidance_data.get("convergence_gain")
+            latest_progress["turn_radius"] = guidance_data.get("turn_radius")
+            latest_progress["straight_distance"] = guidance_data.get("straight_distance")
+            latest_progress["turn_arc_length"] = guidance_data.get("turn_arc_length")
+            latest_progress["estimated_dubins_length"] = guidance_data.get("estimated_dubins_length")
+            latest_progress["heading_error"] = guidance_data.get("heading_error")
+            latest_progress["turn_feasible"] = guidance_data.get("turn_feasible")
 
             if "guidance_error" in guidance_data:
                 latest_progress["guidance_error"] = guidance_data["guidance_error"]

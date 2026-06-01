@@ -89,6 +89,18 @@ function MissionStatusPanel({ mission, uploadStatus }) {
         </>
         )}
 
+        {/* DUBINS METRICS */}
+        {mission?.guidanceMode === "DUBINS" && (
+        <>
+            <p><strong>Turn Radius:</strong> {mission?.turnRadius ?? "--"} m</p>
+            <p><strong>Straight Distance:</strong> {mission?.straightDistance ?? "--"} m</p>
+            <p><strong>Turn Arc Length:</strong> {mission?.turnArcLength ?? "--"} m</p>
+            <p><strong>Estimated Dubins Length:</strong> {mission?.estimatedDubinsLength ?? "--"} m</p>
+            <p><strong>Heading Error:</strong> {mission?.headingError ?? "--"}°</p>
+            <p><strong>Turn Feasible:</strong> {mission?.turnFeasible === true ? "Yes" : mission?.turnFeasible === false ? "No" : "--"}</p>
+        </>
+        )}
+
         {/* DIRECT WAYPOINT METRICS */}
 
         {mission?.guidanceMode === "DIRECT_WAYPOINT" && (

@@ -172,7 +172,13 @@ function Dashboard() {
             pathHeading: r.data.path_heading,
             fieldStrength: r.data.field_strength,
             convergenceGain: r.data.convergence_gain,
-            crossTrackError: r.data.cross_track_error
+            crossTrackError: r.data.cross_track_error,
+            turnRadius: r.data.turn_radius,
+            straightDistance: r.data.straight_distance,
+            turnArcLength: r.data.turn_arc_length,
+            estimatedDubinsLength: r.data.estimated_dubins_length,
+            headingError: r.data.heading_error,
+            turnFeasible: r.data.turn_feasible
           }));
         })
         .catch(() => {});

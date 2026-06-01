@@ -23,6 +23,19 @@ import {
   resetMissionState
 } from "../services/api";
 
+const TRAJECTORY_HISTORY_LIMIT = 300;
+
+function getTelemetryGpsPosition(data) {
+  const latitude = Number(data?.latitude);
+  const longitude = Number(data?.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return [latitude, longitude];
+}
+
 function Dashboard() {
   const [backendStatus, setBackendStatus] = useState("Checking...");
   const [ros2Status, setRos2Status] = useState("Checking...");
@@ -43,6 +56,7 @@ function Dashboard() {
   });
 
   const [telemetryHistory, setTelemetryHistory] = useState([]);
+  const [trajectoryHistory, setTrajectoryHistory] = useState([]);
   const [streamStatus, setStreamStatus] = useState("Connecting...");
   const [commandLogs, setCommandLogs] = useState([]);
 
@@ -52,6 +66,7 @@ function Dashboard() {
     activeWaypoint: 0,
     totalWaypoints: 0,
     progress: 0,
+    lookaheadPoint: null,
     waypoints: []
   });
 
@@ -90,6 +105,7 @@ function Dashboard() {
         activeWaypoint: 0,
         totalWaypoints: 0,
         progress: 0,
+        lookaheadPoint: null,
         waypoints: []
       });
 
@@ -158,6 +174,7 @@ function Dashboard() {
             distanceToWaypoint: r.data.distance_to_waypoint,
             currentPosition: r.data.current_position,
             targetPosition: r.data.target_position,
+            lookaheadPoint: r.data.lookahead_point,
             guidanceMode: r.data.guidance_mode,
             crossTrackError: r.data.cross_track_error,
             alongTrackDistance: r.data.along_track_distance,
@@ -172,7 +189,6 @@ function Dashboard() {
             pathHeading: r.data.path_heading,
             fieldStrength: r.data.field_strength,
             convergenceGain: r.data.convergence_gain,
-            crossTrackError: r.data.cross_track_error,
             turnRadius: r.data.turn_radius,
             straightDistance: r.data.straight_distance,
             turnArcLength: r.data.turn_arc_length,
@@ -193,8 +209,24 @@ function Dashboard() {
     telemetrySocket.onopen = () => setStreamStatus("Connected");
 
     telemetrySocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      let data;
+
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+
+      const gpsPosition = getTelemetryGpsPosition(data);
+
       setTelemetry((prev) => ({ ...prev, ...data }));
+
+      if (gpsPosition) {
+        setTrajectoryHistory((prev) => [
+          ...prev,
+          gpsPosition
+        ].slice(-TRAJECTORY_HISTORY_LIMIT));
+      }
 
       setTelemetryHistory((prev) => [
         ...prev.slice(-30),
@@ -261,7 +293,11 @@ function Dashboard() {
             </div>
 
             <div>
-              <MapPanel telemetry={telemetry} mission={mission} />
+              <MapPanel
+                telemetry={telemetry}
+                mission={mission}
+                trajectoryHistory={trajectoryHistory}
+              />
               
               <div style={{ marginTop: "2rem" }}>
                 <GuidanceModePanel addCommandLog={addCommandLog} />

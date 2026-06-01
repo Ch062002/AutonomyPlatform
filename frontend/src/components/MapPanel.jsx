@@ -10,16 +10,35 @@ import "leaflet/dist/leaflet.css";
 
 import GuidanceOverlay from "./GuidanceOverlay";
 
-function MapPanel({ telemetry, mission }) {
+function toLatLng(point) {
+  if (!point) return null;
+
+  const lat = Array.isArray(point) ? point[0] : point.lat ?? point.latitude;
+  const lon = Array.isArray(point)
+    ? point[1]
+    : point.lon ?? point.lng ?? point.longitude;
+
+  const latitude = Number(lat);
+  const longitude = Number(lon);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return [latitude, longitude];
+}
+
+function MapPanel({ telemetry, mission, trajectoryHistory = [] }) {
   const defaultCenter = [47.3977, 8.5456];
 
   const currentPosition =
-    telemetry?.latitude && telemetry?.longitude
-      ? [telemetry.latitude, telemetry.longitude]
-      : defaultCenter;
+    toLatLng(telemetry) || defaultCenter;
 
   const missionWaypoints =
-    mission?.waypoints?.map((wp) => [wp.lat, wp.lon]) || [];
+    mission?.waypoints?.map(toLatLng).filter(Boolean) || [];
+
+  const flownTrajectory =
+    trajectoryHistory.map(toLatLng).filter(Boolean);
 
   return (
     <div>
@@ -56,6 +75,19 @@ function MapPanel({ telemetry, mission }) {
             </Popup>
           </Marker>
 
+          {/* Actual UAV Trajectory */}
+
+          {flownTrajectory.length > 1 && (
+            <Polyline
+              positions={flownTrajectory}
+              pathOptions={{
+                color: "#22d3ee",
+                weight: 4,
+                opacity: 0.9
+              }}
+            />
+          )}
+
           {/* Mission Path */}
 
           {missionWaypoints.length > 1 && (
@@ -70,18 +102,24 @@ function MapPanel({ telemetry, mission }) {
 
           {/* Waypoint Markers */}
 
-          {mission?.waypoints?.map((wp, index) => (
-            <Marker
-              key={index}
-              position={[wp.lat, wp.lon]}
-            >
-              <Popup>
-                WP{index + 1}
-                <br />
-                Altitude: {wp.alt} m
-              </Popup>
-            </Marker>
-          ))}
+          {mission?.waypoints?.map((wp, index) => {
+            const waypointPosition = toLatLng(wp);
+
+            if (!waypointPosition) return null;
+
+            return (
+              <Marker
+                key={index}
+                position={waypointPosition}
+              >
+                <Popup>
+                  WP{index + 1}
+                  <br />
+                  Altitude: {wp.alt} m
+                </Popup>
+              </Marker>
+            );
+          })}
 
           {/* Guidance Overlay */}
 

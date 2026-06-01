@@ -168,6 +168,11 @@ function Dashboard() {
             lookaheadDistance: r.data.lookahead_distance,
             pursuitDistance: r.data.pursuit_distance,
             pursuitHeading: r.data.pursuit_heading,
+            desiredHeading: r.data.desired_heading,
+            pathHeading: r.data.path_heading,
+            fieldStrength: r.data.field_strength,
+            convergenceGain: r.data.convergence_gain,
+            crossTrackError: r.data.cross_track_error
           }));
         })
         .catch(() => {});

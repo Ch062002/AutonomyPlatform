@@ -71,10 +71,21 @@ function MissionStatusPanel({ mission, uploadStatus }) {
 
         {/* PURE PURSUIT METRICS */}
         {mission?.guidanceMode === "PURE_PURSUIT" && (
-  <>
+        <>
             <p><strong>Lookahead Distance:</strong> {mission?.lookaheadDistance ?? "--"} m</p>
             <p><strong>Pursuit Distance:</strong> {mission?.pursuitDistance ?? "--"} m</p>
             <p><strong>Pursuit Heading:</strong> {mission?.pursuitHeading ?? "--"}°</p>
+        </>
+        )}
+
+        {/* VECTOR FIELD METRICS */}
+        {mission?.guidanceMode === "VECTOR_FIELD" && (
+        <>
+            <p><strong>Desired Heading:</strong> {mission?.desiredHeading ?? "--"}°</p>
+            <p><strong>Path Heading:</strong> {mission?.pathHeading ?? "--"}°</p>
+            <p><strong>Field Strength:</strong> {mission?.fieldStrength ?? "--"}</p>
+            <p><strong>Convergence Gain:</strong> {mission?.convergenceGain ?? "--"}</p>
+            <p><strong>Cross-Track Error:</strong> {mission?.crossTrackError ?? "--"} m</p>
         </>
         )}
 

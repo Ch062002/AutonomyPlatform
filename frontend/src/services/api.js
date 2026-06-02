@@ -111,6 +111,10 @@ export const getNavigationLogs = () => {
   return axios.get(`${API_BASE_URL}/navigation/logs`);
 };
 
+export const getNavigationAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/navigation/analytics`);
+};
+
 export const clearNavigationLogs = () => {
   return axios.post(`${API_BASE_URL}/navigation/logs/clear`);
 };

@@ -239,6 +239,22 @@ def read_navigation_logs(limit=100):
     return logs
 
 
+def read_all_navigation_logs():
+    if not os.path.exists(NAVIGATION_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(NAVIGATION_LOG_FILE, "r") as f:
+        for line in f:
+            try:
+                logs.append(json.loads(line))
+            except Exception:
+                continue
+
+    return logs
+
+
 def read_all_guidance_logs():
     if not os.path.exists(GUIDANCE_LOG_FILE):
         return []
@@ -356,6 +372,51 @@ def build_mode_analytics(logs):
     }
 
     return analytics
+
+
+def count_gps_samples(logs):
+    return sum(
+        1
+        for log in logs
+        if is_valid_number(log.get("latitude"))
+        and is_valid_number(log.get("longitude"))
+    )
+
+
+def build_position_source_summary(logs):
+    summary = {}
+
+    for log in logs:
+        source = log.get("position_source") or "Unknown"
+        summary[source] = summary.get(source, 0) + 1
+
+    return summary
+
+
+def build_navigation_analytics(logs):
+    return {
+        "samples": len(logs),
+        "avg_velocity": safe_average(log.get("velocity") for log in logs),
+        "max_velocity": safe_max(log.get("velocity") for log in logs),
+        "avg_global_altitude": safe_average(
+            log.get("global_altitude") for log in logs
+        ),
+        "min_global_altitude": safe_min(
+            log.get("global_altitude") for log in logs
+        ),
+        "max_global_altitude": safe_max(
+            log.get("global_altitude") for log in logs
+        ),
+        "failsafe_count": sum(1 for log in logs if log.get("failsafe") is True),
+        "healthy_count": sum(
+            1 for log in logs if log.get("navigation_health") == "Healthy"
+        ),
+        "warning_count": sum(
+            1 for log in logs if log.get("navigation_health") == "Warning"
+        ),
+        "gps_sample_count": count_gps_samples(logs),
+        "position_source_summary": build_position_source_summary(logs),
+    }
 
 
 def set_mission_state(
@@ -531,6 +592,24 @@ def get_guidance_analytics():
 @router.get("/navigation/logs")
 def get_navigation_logs():
     return read_navigation_logs(limit=100)
+
+
+@router.get("/navigation/analytics")
+def get_navigation_analytics():
+    logs = read_all_navigation_logs()
+
+    if not logs:
+        return {
+            "status": "success",
+            "message": "No navigation logs available for analytics",
+            "analytics": {}
+        }
+
+    return {
+        "status": "success",
+        "message": "Navigation analytics generated successfully",
+        "analytics": build_navigation_analytics(logs)
+    }
 
 
 @router.post("/navigation/logs/clear")

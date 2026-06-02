@@ -12,6 +12,8 @@ MISSION_PROGRESS_FILE = "/tmp/mission_progress.json"
 GUIDANCE_OUTPUT_FILE = "/tmp/guidance_output.json"
 GUIDANCE_LOG_FILE = "/tmp/guidance_metrics_log.jsonl"
 GUIDANCE_EXPORT_FILE = "/tmp/guidance_metrics_export.csv"
+NAVIGATION_LOG_FILE = "/tmp/navigation_metrics_log.jsonl"
+NAVIGATION_EXPORT_FILE = "/tmp/navigation_metrics_export.csv"
 
 latest_progress = {
     "mission_state": "Idle",
@@ -62,6 +64,23 @@ GUIDANCE_ANALYTICS_MODES = [
     "PURE_PURSUIT",
     "VECTOR_FIELD",
     "DUBINS",
+]
+
+NAVIGATION_LOG_FIELDS = [
+    "timestamp",
+    "latitude",
+    "longitude",
+    "global_altitude",
+    "current_position",
+    "velocity",
+    "nav_state",
+    "flight_mode",
+    "arming_state",
+    "failsafe",
+    "navigation_health",
+    "position_source",
+    "estimator_status",
+    "ekf_status",
 ]
 
 
@@ -124,6 +143,66 @@ def append_guidance_log(progress):
         f.write(json.dumps(log_entry) + "\n")
 
 
+def is_valid_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def get_navigation_health(telemetry):
+    latitude = telemetry.get("latitude", telemetry.get("lat"))
+    longitude = telemetry.get("longitude", telemetry.get("lon"))
+    failsafe = bool(telemetry.get("failsafe", False))
+
+    if is_valid_number(latitude) and is_valid_number(longitude) and not failsafe:
+        return "Healthy"
+
+    return "Warning"
+
+
+def get_latest_telemetry_data():
+    try:
+        import app.services.ros2_bridge as ros2_bridge
+
+        return ros2_bridge.latest_telemetry or {}
+    except Exception:
+        return {}
+
+
+def build_navigation_log_entry(progress, telemetry):
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "latitude": telemetry.get("latitude", telemetry.get("lat")),
+        "longitude": telemetry.get("longitude", telemetry.get("lon")),
+        "global_altitude": telemetry.get(
+            "global_altitude",
+            telemetry.get("altitude")
+        ),
+        "current_position": progress.get(
+            "current_position",
+            telemetry.get("current_position", telemetry.get("local_position"))
+        ),
+        "velocity": telemetry.get("velocity"),
+        "nav_state": telemetry.get("nav_state", telemetry.get("flight_mode")),
+        "flight_mode": telemetry.get("flight_mode"),
+        "arming_state": telemetry.get("arming_state"),
+        "failsafe": telemetry.get("failsafe"),
+        "navigation_health": get_navigation_health(telemetry),
+        "position_source": telemetry.get("position_source", "GPS/SITL"),
+        "estimator_status": telemetry.get(
+            "estimator_status",
+            "Pending integration"
+        ),
+        "ekf_status": telemetry.get("ekf_status", "Pending integration"),
+    }
+
+
+def append_navigation_log(progress):
+    telemetry = get_latest_telemetry_data()
+    log_entry = build_navigation_log_entry(progress, telemetry)
+
+    with open(NAVIGATION_LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
 def read_guidance_logs(limit=100):
     if not os.path.exists(GUIDANCE_LOG_FILE):
         return []
@@ -131,6 +210,24 @@ def read_guidance_logs(limit=100):
     logs = []
 
     with open(GUIDANCE_LOG_FILE, "r") as f:
+        lines = f.readlines()[-limit:]
+
+    for line in lines:
+        try:
+            logs.append(json.loads(line))
+        except Exception:
+            continue
+
+    return logs
+
+
+def read_navigation_logs(limit=100):
+    if not os.path.exists(NAVIGATION_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(NAVIGATION_LOG_FILE, "r") as f:
         lines = f.readlines()[-limit:]
 
     for line in lines:
@@ -352,6 +449,7 @@ def get_mission_progress():
             latest_progress["turn_feasible"] = guidance_data.get("turn_feasible")
 
         append_guidance_log(latest_progress)
+        append_navigation_log(latest_progress)
 
         return latest_progress
 
@@ -428,6 +526,53 @@ def get_guidance_analytics():
         "message": "Guidance analytics generated successfully",
         "analytics": analytics
     }
+
+
+@router.get("/navigation/logs")
+def get_navigation_logs():
+    return read_navigation_logs(limit=100)
+
+
+@router.post("/navigation/logs/clear")
+def clear_navigation_logs():
+    if os.path.exists(NAVIGATION_LOG_FILE):
+        os.remove(NAVIGATION_LOG_FILE)
+
+    if os.path.exists(NAVIGATION_EXPORT_FILE):
+        os.remove(NAVIGATION_EXPORT_FILE)
+
+    return {
+        "status": "success",
+        "message": "Navigation logs cleared successfully"
+    }
+
+
+@router.get("/navigation/logs/export")
+def export_navigation_logs():
+    logs = read_navigation_logs(limit=100000)
+
+    with open(NAVIGATION_EXPORT_FILE, "w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=NAVIGATION_LOG_FIELDS)
+        writer.writeheader()
+
+        for log in logs:
+            row = {}
+
+            for field in NAVIGATION_LOG_FIELDS:
+                value = log.get(field)
+
+                if isinstance(value, (list, dict)):
+                    value = json.dumps(value)
+
+                row[field] = value
+
+            writer.writerow(row)
+
+    return FileResponse(
+        NAVIGATION_EXPORT_FILE,
+        media_type="text/csv",
+        filename="navigation_metrics_export.csv"
+    )
 
 
 @router.get("/guidance/logs/export")

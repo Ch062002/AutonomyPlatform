@@ -2,6 +2,7 @@ function Sidebar() {
   const menuItems = [
     "Dashboard",
     "Telemetry",
+    "Navigation",
     "Commands",
     "Mission",
     "Maps",

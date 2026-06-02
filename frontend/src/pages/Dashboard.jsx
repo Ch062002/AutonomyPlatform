@@ -14,6 +14,7 @@ import GuidanceModePanel from "../components/GuidanceModePanel";
 import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
 import GuidanceAnalyticsPanel from "../components/GuidanceAnalyticsPanel";
 import MissionReplayPanel from "../components/MissionReplayPanel";
+import NavigationStatusPanel from "../components/NavigationStatusPanel";
 
 import {
   getBackendStatus,
@@ -292,27 +293,36 @@ function Dashboard() {
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1.75fr) minmax(340px, 0.95fr)",
-              gap: "2rem",
+              gap: "1.6rem",
               alignItems: "start"
             }}
           >
             <div>
               <TelemetryCard telemetry={telemetry} />
 
-              <div style={{ marginTop: "2rem" }}>
+              <div
+                style={{
+                  marginTop: "1.6rem",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                  gap: "1.6rem",
+                  alignItems: "start"
+                }}
+              >
+                <NavigationStatusPanel telemetry={telemetry} mission={mission} />
                 <TelemetryCharts history={telemetryHistory} />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <CommandPanel addCommandLog={addCommandLog} />
               </div>
 
               <div
                 style={{
-                  marginTop: "2rem",
+                  marginTop: "1.6rem",
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                  gap: "2rem",
+                  gap: "1.6rem",
                   alignItems: "start"
                 }}
               >
@@ -320,7 +330,7 @@ function Dashboard() {
                 <GuidanceLogsPanel />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <GuidanceAnalyticsPanel />
               </div>
             </div>
@@ -332,23 +342,23 @@ function Dashboard() {
                 trajectoryHistory={trajectoryHistory}
               />
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <GuidanceModePanel addCommandLog={addCommandLog} />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <VehicleHealthPanel telemetry={telemetry} />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <CommandLog logs={commandLogs} />
               </div>
 
-              <div style={{ marginTop: "2rem" }}>
+              <div style={{ marginTop: "1.6rem" }}>
                 <MissionPanel
                   mission={mission}
                   createDemoMission={createDemoMission}

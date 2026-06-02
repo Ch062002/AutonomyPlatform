@@ -15,6 +15,7 @@ import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
 import GuidanceAnalyticsPanel from "../components/GuidanceAnalyticsPanel";
 import MissionReplayPanel from "../components/MissionReplayPanel";
 import NavigationStatusPanel from "../components/NavigationStatusPanel";
+import NavigationLogsPanel from "../components/NavigationLogsPanel";
 
 import {
   getBackendStatus,
@@ -302,6 +303,10 @@ function Dashboard() {
 
               <div style={{ marginTop: "1.6rem" }}>
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
+              </div>
+
+              <div style={{ marginTop: "1.6rem" }}>
+                <NavigationLogsPanel />
               </div>
 
               <div style={{ marginTop: "1.6rem" }}>

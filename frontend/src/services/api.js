@@ -107,6 +107,18 @@ export const getGuidanceAnalytics = () => {
   return axios.get(`${API_BASE_URL}/guidance/analytics`);
 };
 
+export const getNavigationLogs = () => {
+  return axios.get(`${API_BASE_URL}/navigation/logs`);
+};
+
+export const clearNavigationLogs = () => {
+  return axios.post(`${API_BASE_URL}/navigation/logs/clear`);
+};
+
+export const exportNavigationLogs = () => {
+  window.open(`${API_BASE_URL}/navigation/logs/export`, "_blank");
+};
+
 export const clearGuidanceLogs = () => {
   return axios.post(`${API_BASE_URL}/guidance/logs/clear`);
 };

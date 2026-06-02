@@ -20,6 +20,7 @@ import NavigationAnalyticsPanel from "../components/NavigationAnalyticsPanel";
 import NavigationReplayPanel from "../components/NavigationReplayPanel";
 import StateEstimationPanel from "../components/StateEstimationPanel";
 import EkfAnalyticsPanel from "../components/EkfAnalyticsPanel";
+import EstimationComparisonPanel from "../components/EstimationComparisonPanel";
 
 import {
   getBackendStatus,
@@ -380,7 +381,7 @@ function Dashboard() {
             </section>
 
             <section>
-              <SectionHeader label="Section C" title="Guidance, Navigation, and EKF Analytics" />
+              <SectionHeader label="Section C" title="Guidance, Navigation, and Estimation Analytics" />
 
               <div
                 style={{
@@ -393,6 +394,7 @@ function Dashboard() {
                 <GuidanceAnalyticsPanel />
                 <NavigationAnalyticsPanel />
                 <EkfAnalyticsPanel />
+                <EstimationComparisonPanel />
               </div>
             </section>
 

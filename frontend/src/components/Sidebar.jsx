@@ -1,14 +1,17 @@
 function Sidebar() {
   const menuItems = [
-    "Dashboard",
-    "Telemetry",
-    "Navigation",
-    "State Estimation",
-    "Commands",
-    "Mission",
-    "Maps",
-    "Logs",
-    "Settings"
+    { label: "Dashboard" },
+    { label: "Telemetry" },
+    { label: "Navigation" },
+    {
+      label: "State Estimation",
+      subItems: ["EKF", "UKF", "Comparison"]
+    },
+    { label: "Commands" },
+    { label: "Mission" },
+    { label: "Maps" },
+    { label: "Logs" },
+    { label: "Settings" }
   ];
 
   return (
@@ -36,22 +39,43 @@ function Sidebar() {
 
       {menuItems.map((item) => (
         <div
-          key={item}
-          style={{
-            padding: "0.9rem",
-            marginBottom: "0.8rem",
-            borderRadius: "10px",
-            backgroundColor:
-              item === "Dashboard"
-                ? "#1e293b"
-                : "transparent",
-            cursor: "pointer",
-            transition: "0.2s",
-            border: "1px solid #1e293b",
-            fontWeight: "500"
-          }}
+          key={item.label}
         >
-          {item}
+          <div
+            style={{
+              padding: "0.9rem",
+              marginBottom: item.subItems ? "0.45rem" : "0.8rem",
+              borderRadius: "10px",
+              backgroundColor:
+                item.label === "Dashboard"
+                  ? "#1e293b"
+                  : "transparent",
+              cursor: "pointer",
+              transition: "0.2s",
+              border: "1px solid #1e293b",
+              fontWeight: "500"
+            }}
+          >
+            {item.label}
+          </div>
+
+          {item.subItems && (
+            <div style={{ marginBottom: "0.8rem", paddingLeft: "0.8rem" }}>
+              {item.subItems.map((subItem) => (
+                <div
+                  key={subItem}
+                  style={{
+                    padding: "0.45rem 0.7rem",
+                    color: "#94a3b8",
+                    fontSize: "0.9rem",
+                    borderLeft: "1px solid #334155"
+                  }}
+                >
+                  {subItem}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </aside>

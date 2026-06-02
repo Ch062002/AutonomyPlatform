@@ -137,8 +137,20 @@ export const getEkfStatus = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/ekf`);
 };
 
+export const getUkfStatus = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/ukf`);
+};
+
 export const getEkfAnalytics = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/ekf/analytics`);
+};
+
+export const getEstimationComparison = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/comparison`);
+};
+
+export const getEstimationComparisonAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/comparison/analytics`);
 };
 
 export const getStateEstimationLogs = () => {

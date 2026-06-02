@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   getEkfStatus,
+  getEstimationComparison,
   getStateEstimationStatus
 } from "../services/api";
 
@@ -63,19 +64,23 @@ function filterColor(filter) {
 function StateEstimationPanel() {
   const [status, setStatus] = useState(null);
   const [ekf, setEkf] = useState(null);
+  const [comparison, setComparison] = useState(null);
 
   const fetchStatus = async () => {
     try {
-      const [statusResponse, ekfResponse] = await Promise.all([
+      const [statusResponse, ekfResponse, comparisonResponse] = await Promise.all([
         getStateEstimationStatus(),
-        getEkfStatus()
+        getEkfStatus(),
+        getEstimationComparison()
       ]);
 
       setStatus(statusResponse.data || null);
       setEkf(ekfResponse.data || null);
+      setComparison(comparisonResponse.data || null);
     } catch {
       setStatus(null);
       setEkf(null);
+      setComparison(null);
     }
   };
 
@@ -89,6 +94,10 @@ function StateEstimationPanel() {
   const sensorFusion = status?.sensor_fusion || {};
   const ekfPosition = ekf?.estimated_position || {};
   const ekfVelocity = ekf?.estimated_velocity || {};
+  const ukf = comparison?.ukf || status?.ukf || {};
+  const ukfPosition = ukf?.estimated_position || ukf?.output?.position || {};
+  const ukfVelocity = ukf?.estimated_velocity || ukf?.output?.velocity || {};
+  const comparisonMetrics = comparison?.comparison || {};
 
   return (
     <div>
@@ -106,82 +115,164 @@ function StateEstimationPanel() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-            gap: "0.8rem"
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "0.9rem"
           }}
         >
-          <StatusTile
-            label="Raw GPS"
-            value={rawGps.available ? "Available" : "Waiting"}
-            color={rawGps.available ? "#22c55e" : "#f59e0b"}
-          />
-          <StatusTile
-            label="EKF Status"
-            value={ekf?.status || filterStatus(status?.ekf)}
-            color={ekf?.enabled ? "#22c55e" : filterColor(status?.ekf)}
-          />
-          <StatusTile
-            label="UKF Status"
-            value={filterStatus(status?.ukf)}
-            color={filterColor(status?.ukf)}
-          />
-          <StatusTile
-            label="Observer Status"
-            value={filterStatus(status?.observer)}
-            color={filterColor(status?.observer)}
-          />
-          <StatusTile
-            label="Sensor Fusion Status"
-            value={sensorFusion.status || "--"}
-            color={sensorFusion.enabled ? "#22c55e" : "#94a3b8"}
-          />
-          <StatusTile
-            label="Estimation Source"
-            value={status?.estimation_source || "--"}
-            color="#38bdf8"
-          />
-          <StatusTile
-            label="Future Comparison Ready"
-            value={formatValue(status?.future_comparison_ready)}
-            color={status?.future_comparison_ready ? "#22c55e" : "#f59e0b"}
-          />
-          <StatusTile
-            label="GPS Position"
-            value={`${formatValue(rawGps.latitude)}, ${formatValue(rawGps.longitude)}`}
-          />
-          <StatusTile
-            label="GPS Altitude"
-            value={formatValue(rawGps.global_altitude, " m")}
-          />
-          <StatusTile
-            label="GPS Velocity"
-            value={formatValue(rawGps.velocity, " m/s")}
-          />
-          <StatusTile
-            label="EKF Position"
-            value={`${formatValue(ekfPosition.x)}, ${formatValue(ekfPosition.y)}`}
-            color="#38bdf8"
-          />
-          <StatusTile
-            label="EKF Velocity"
-            value={`${formatValue(ekfVelocity.vx, " m/s")}, ${formatValue(ekfVelocity.vy, " m/s")}`}
-            color="#38bdf8"
-          />
-          <StatusTile
-            label="Innovation"
-            value={formatValue(ekf?.innovation)}
-            color="#f59e0b"
-          />
-          <StatusTile
-            label="Covariance Trace"
-            value={formatValue(ekf?.covariance_trace)}
-            color="#a78bfa"
-          />
-          <StatusTile
-            label="EKF Health"
-            value={ekf?.health || "--"}
-            color={ekf?.health === "healthy" ? "#22c55e" : "#f59e0b"}
-          />
+          <div>
+            <h3 style={{ marginTop: 0 }}>Raw GPS</h3>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+                gap: "0.7rem"
+              }}
+            >
+              <StatusTile
+                label="Status"
+                value={rawGps.available ? "Available" : "Waiting"}
+                color={rawGps.available ? "#22c55e" : "#f59e0b"}
+              />
+              <StatusTile
+                label="Position"
+                value={`${formatValue(rawGps.latitude)}, ${formatValue(rawGps.longitude)}`}
+              />
+              <StatusTile
+                label="Altitude"
+                value={formatValue(rawGps.global_altitude, " m")}
+              />
+              <StatusTile
+                label="Velocity"
+                value={formatValue(rawGps.velocity, " m/s")}
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ marginTop: 0 }}>EKF</h3>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+                gap: "0.7rem"
+              }}
+            >
+              <StatusTile
+                label="Status"
+                value={ekf?.status || filterStatus(status?.ekf)}
+                color={ekf?.enabled ? "#22c55e" : filterColor(status?.ekf)}
+              />
+              <StatusTile
+                label="Position"
+                value={`${formatValue(ekfPosition.x)}, ${formatValue(ekfPosition.y)}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Velocity"
+                value={`${formatValue(ekfVelocity.vx, " m/s")}, ${formatValue(ekfVelocity.vy, " m/s")}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Innovation"
+                value={formatValue(ekf?.innovation)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Covariance"
+                value={formatValue(ekf?.covariance_trace)}
+                color="#a78bfa"
+              />
+              <StatusTile
+                label="Health"
+                value={ekf?.health || "--"}
+                color={ekf?.health === "healthy" ? "#22c55e" : "#f59e0b"}
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ marginTop: 0 }}>UKF</h3>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+                gap: "0.7rem"
+              }}
+            >
+              <StatusTile
+                label="Status"
+                value={ukf?.status || filterStatus(status?.ukf)}
+                color={ukf?.enabled ? "#22c55e" : filterColor(status?.ukf)}
+              />
+              <StatusTile
+                label="Position"
+                value={`${formatValue(ukfPosition.x)}, ${formatValue(ukfPosition.y)}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Velocity"
+                value={`${formatValue(ukfVelocity.vx, " m/s")}, ${formatValue(ukfVelocity.vy, " m/s")}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Innovation"
+                value={formatValue(ukf?.innovation)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Covariance"
+                value={formatValue(ukf?.covariance_trace ?? ukf?.covariance)}
+                color="#a78bfa"
+              />
+              <StatusTile
+                label="Health"
+                value={ukf?.health || "--"}
+                color={ukf?.health === "healthy" ? "#22c55e" : "#f59e0b"}
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ marginTop: 0 }}>Comparison</h3>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+                gap: "0.7rem"
+              }}
+            >
+              <StatusTile
+                label="Position Diff"
+                value={formatValue(comparisonMetrics.position_difference)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Velocity Diff"
+                value={formatValue(comparisonMetrics.velocity_difference)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Innovation Diff"
+                value={formatValue(comparisonMetrics.innovation_difference)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Fusion Status"
+                value={sensorFusion.status || "--"}
+                color={sensorFusion.enabled ? "#22c55e" : "#94a3b8"}
+              />
+              <StatusTile
+                label="Source"
+                value={status?.estimation_source || "--"}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Ready"
+                value={formatValue(status?.future_comparison_ready)}
+                color={status?.future_comparison_ready ? "#22c55e" : "#f59e0b"}
+              />
+            </div>
+          </div>
         </div>
 
         <div

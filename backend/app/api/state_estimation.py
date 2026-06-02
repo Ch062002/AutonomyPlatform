@@ -7,14 +7,18 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
 from app.state_estimation.ekf import SimpleEKF
+from app.state_estimation.ukf import PlaceholderUKF
 
 router = APIRouter()
 
 STATE_ESTIMATION_LOG_FILE = "/tmp/state_estimation_log.jsonl"
 STATE_ESTIMATION_EXPORT_FILE = "/tmp/state_estimation_export.csv"
 EKF_LOG_FILE = "/tmp/ekf_log.jsonl"
+UKF_LOG_FILE = "/tmp/ukf_log.jsonl"
+ESTIMATION_COMPARISON_LOG_FILE = "/tmp/estimation_comparison_log.jsonl"
 
 ekf_filter = SimpleEKF()
+ukf_filter = PlaceholderUKF()
 
 STATE_ESTIMATION_LOG_FIELDS = [
     "timestamp",
@@ -96,6 +100,26 @@ def append_ekf_log(result):
         f.write(json.dumps(log_entry) + "\n")
 
 
+def append_ukf_log(result):
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        **result,
+    }
+
+    with open(UKF_LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
+def append_comparison_log(result):
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        **result,
+    }
+
+    with open(ESTIMATION_COMPARISON_LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
 def read_ekf_logs(limit=100000):
     if not os.path.exists(EKF_LOG_FILE):
         return []
@@ -103,6 +127,42 @@ def read_ekf_logs(limit=100000):
     logs = []
 
     with open(EKF_LOG_FILE, "r") as f:
+        lines = f.readlines()[-limit:]
+
+    for line in lines:
+        try:
+            logs.append(json.loads(line))
+        except Exception:
+            continue
+
+    return logs
+
+
+def read_ukf_logs(limit=100000):
+    if not os.path.exists(UKF_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(UKF_LOG_FILE, "r") as f:
+        lines = f.readlines()[-limit:]
+
+    for line in lines:
+        try:
+            logs.append(json.loads(line))
+        except Exception:
+            continue
+
+    return logs
+
+
+def read_comparison_logs(limit=100000):
+    if not os.path.exists(ESTIMATION_COMPARISON_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(ESTIMATION_COMPARISON_LOG_FILE, "r") as f:
         lines = f.readlines()[-limit:]
 
     for line in lines:
@@ -202,9 +262,116 @@ def build_ekf_result():
     return result
 
 
+def build_ukf_result():
+    telemetry = get_latest_telemetry_data()
+    latitude = telemetry.get("latitude", telemetry.get("lat"))
+    longitude = telemetry.get("longitude", telemetry.get("lon"))
+    velocity_x, velocity_y = get_velocity_components(telemetry)
+
+    result = {
+        "enabled": True,
+        "status": "placeholder",
+        "raw_position": {
+            "x": latitude,
+            "y": longitude,
+            "latitude": latitude,
+            "longitude": longitude,
+        },
+        "estimated_position": {
+            "x": None,
+            "y": None,
+        },
+        "estimated_velocity": {
+            "vx": None,
+            "vy": None,
+        },
+        "innovation": None,
+        "covariance_trace": None,
+        "health": "waiting_for_gps",
+        "implementation": "placeholder_unscented_framework",
+    }
+
+    if not is_valid_number(latitude) or not is_valid_number(longitude):
+        return result
+
+    ukf_update = ukf_filter.update(
+        latitude,
+        longitude,
+        velocity_x,
+        velocity_y
+    )
+
+    result["estimated_position"] = {
+        "x": ukf_update["estimated_x"],
+        "y": ukf_update["estimated_y"],
+    }
+    result["estimated_velocity"] = {
+        "vx": ukf_update["estimated_vx"],
+        "vy": ukf_update["estimated_vy"],
+    }
+    result["innovation"] = ukf_update["innovation"]
+    result["covariance_trace"] = ukf_update["covariance_trace"]
+    result["health"] = (
+        "healthy"
+        if ukf_update["covariance_trace"] < 36.0
+        else "converging"
+    )
+
+    return result
+
+
+def vector_difference_norm(first, second, keys):
+    values = []
+
+    for key in keys:
+        first_value = first.get(key)
+        second_value = second.get(key)
+
+        if is_valid_number(first_value) and is_valid_number(second_value):
+            values.append(first_value - second_value)
+
+    if not values:
+        return None
+
+    return sum(value * value for value in values) ** 0.5
+
+
+def build_estimation_comparison():
+    telemetry = get_latest_telemetry_data()
+    ekf_result = build_ekf_result()
+    ukf_result = build_ukf_result()
+    ekf_innovation = ekf_result.get("innovation")
+    ukf_innovation = ukf_result.get("innovation")
+
+    innovation_difference = None
+
+    if is_valid_number(ekf_innovation) and is_valid_number(ukf_innovation):
+        innovation_difference = abs(ekf_innovation - ukf_innovation)
+
+    return {
+        "raw_gps": build_raw_gps_status(telemetry),
+        "ekf": ekf_result,
+        "ukf": ukf_result,
+        "comparison": {
+            "position_difference": vector_difference_norm(
+                ekf_result.get("estimated_position", {}),
+                ukf_result.get("estimated_position", {}),
+                ["x", "y"]
+            ),
+            "velocity_difference": vector_difference_norm(
+                ekf_result.get("estimated_velocity", {}),
+                ukf_result.get("estimated_velocity", {}),
+                ["vx", "vy"]
+            ),
+            "innovation_difference": innovation_difference,
+        }
+    }
+
+
 def build_state_estimation_status():
     telemetry = get_latest_telemetry_data()
     ekf_result = build_ekf_result()
+    ukf_result = build_ukf_result()
 
     return {
         "raw_gps": build_raw_gps_status(telemetry),
@@ -219,7 +386,17 @@ def build_state_estimation_status():
             "innovation": ekf_result["innovation"],
             "health": ekf_result["health"],
         },
-        "ukf": build_filter_placeholder("UKF"),
+        "ukf": {
+            "enabled": ukf_result["enabled"],
+            "status": ukf_result["status"],
+            "output": {
+                "position": ukf_result["estimated_position"],
+                "velocity": ukf_result["estimated_velocity"],
+            },
+            "covariance": ukf_result["covariance_trace"],
+            "innovation": ukf_result["innovation"],
+            "health": ukf_result["health"],
+        },
         "observer": build_filter_placeholder("Observer"),
         "sensor_fusion": {
             "enabled": False,
@@ -276,6 +453,13 @@ def get_ekf_status():
     return result
 
 
+@router.get("/state-estimation/ukf")
+def get_ukf_status():
+    result = build_ukf_result()
+    append_ukf_log(result)
+    return result
+
+
 @router.get("/state-estimation/ekf/analytics")
 def get_ekf_analytics():
     logs = read_ekf_logs(limit=100000)
@@ -293,6 +477,44 @@ def get_ekf_analytics():
             ),
             "avg_covariance_trace": safe_average(
                 log.get("covariance_trace") for log in logs
+            ),
+        }
+    }
+
+
+@router.get("/state-estimation/comparison")
+def get_estimation_comparison():
+    result = build_estimation_comparison()
+    append_ekf_log(result["ekf"])
+    append_ukf_log(result["ukf"])
+    append_comparison_log(result)
+    return result
+
+
+@router.get("/state-estimation/comparison/analytics")
+def get_estimation_comparison_analytics():
+    logs = read_comparison_logs(limit=100000)
+
+    return {
+        "status": "success",
+        "message": "Estimation comparison analytics generated successfully",
+        "analytics": {
+            "samples": len(logs),
+            "avg_position_difference": safe_average(
+                log.get("comparison", {}).get("position_difference")
+                for log in logs
+            ),
+            "max_position_difference": safe_max(
+                log.get("comparison", {}).get("position_difference")
+                for log in logs
+            ),
+            "avg_velocity_difference": safe_average(
+                log.get("comparison", {}).get("velocity_difference")
+                for log in logs
+            ),
+            "avg_innovation_difference": safe_average(
+                log.get("comparison", {}).get("innovation_difference")
+                for log in logs
             ),
         }
     }

@@ -98,3 +98,11 @@ export const resumeMission = () => {
 export const setGuidanceMode = (mode) => {
   return axios.post(`${API_BASE_URL}/guidance/mode/${mode}`);
 };
+
+export const getGuidanceLogs = () => {
+  return axios.get(`${API_BASE_URL}/guidance/logs`);
+};
+
+export const clearGuidanceLogs = () => {
+  return axios.post(`${API_BASE_URL}/guidance/logs/clear`);
+};

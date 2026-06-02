@@ -12,6 +12,7 @@ import MapPanel from "../components/MapPanel";
 import MissionStatusPanel from "../components/MissionStatusPanel";
 import { uploadMission } from "../services/api";
 import GuidanceModePanel from "../components/GuidanceModePanel";
+import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
 
 import {
   getBackendStatus,
@@ -305,6 +306,10 @@ function Dashboard() {
 
               <div style={{ marginTop: "2rem" }}>
                 <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
+              </div>
+
+              <div style={{ marginTop: "2rem" }}>
+                <GuidanceLogsPanel />
               </div>
 
               <div style={{ marginTop: "2rem" }}>

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { getGuidanceLogs, clearGuidanceLogs } from "../services/api";
+
+import {
+  getGuidanceLogs,
+  clearGuidanceLogs,
+  exportGuidanceLogs
+} from "../services/api";
 
 function GuidanceLogsPanel() {
   const [logs, setLogs] = useState([]);
@@ -43,9 +48,15 @@ function GuidanceLogsPanel() {
           overflowY: "auto"
         }}
       >
-        <button onClick={handleClear}>
-          Clear Logs
-        </button>
+        <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1rem" }}>
+          <button onClick={handleClear}>
+            Clear Logs
+          </button>
+
+          <button onClick={exportGuidanceLogs}>
+            Export CSV
+          </button>
+        </div>
 
         {logs.slice(-20).reverse().map((log, index) => (
           <div
@@ -60,7 +71,10 @@ function GuidanceLogsPanel() {
           >
             <strong>{log.guidance_mode || "--"}</strong>
             <p>Progress: {log.progress_percent ?? "--"}%</p>
-            <p>WP: {log.active_waypoint ?? "--"}/{log.total_waypoints ?? "--"}</p>
+            <p>
+              WP: {log.active_waypoint ?? "--"}/
+              {log.total_waypoints ?? "--"}
+            </p>
             <p>Distance: {log.distance_to_waypoint ?? "--"} m</p>
             <p>CTE: {log.cross_track_error ?? "--"} m</p>
           </div>

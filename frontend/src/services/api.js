@@ -106,3 +106,7 @@ export const getGuidanceLogs = () => {
 export const clearGuidanceLogs = () => {
   return axios.post(`${API_BASE_URL}/guidance/logs/clear`);
 };
+
+export const exportGuidanceLogs = () => {
+  window.open(`${API_BASE_URL}/guidance/logs/export`, "_blank");
+};

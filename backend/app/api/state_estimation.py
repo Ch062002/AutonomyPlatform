@@ -18,6 +18,7 @@ EKF_LOG_FILE = "/tmp/ekf_log.jsonl"
 UKF_LOG_FILE = "/tmp/ukf_log.jsonl"
 OBSERVER_LOG_FILE = "/tmp/observer_log.jsonl"
 ESTIMATION_COMPARISON_LOG_FILE = "/tmp/estimation_comparison_log.jsonl"
+STATE_ESTIMATION_BENCHMARK_EXPORT_FILE = "/tmp/state_estimation_benchmark_export.csv"
 
 ekf_filter = SimpleEKF()
 ukf_filter = PlaceholderUKF()
@@ -233,6 +234,141 @@ def safe_max(values):
     return max(numeric_values)
 
 
+def position_error_from_log(log):
+    raw_position = log.get("raw_position", {})
+    estimated_position = log.get("estimated_position", {})
+
+    return vector_difference_norm(
+        raw_position,
+        estimated_position,
+        ["x", "y"]
+    )
+
+
+def velocity_error_from_log(log):
+    estimated_velocity = log.get("estimated_velocity", {})
+    raw_vx = log.get("raw_velocity_x")
+    raw_vy = log.get("raw_velocity_y")
+
+    if raw_vx is None and raw_vy is None:
+        raw_velocity = {"vx": 0.0, "vy": 0.0}
+    else:
+        raw_velocity = {"vx": raw_vx, "vy": raw_vy}
+
+    return vector_difference_norm(
+        raw_velocity,
+        estimated_velocity,
+        ["vx", "vy"]
+    )
+
+
+def health_score(logs):
+    if not logs:
+        return None
+
+    score_by_health = {
+        "healthy": 1.0,
+        "running": 0.85,
+        "converging": 0.65,
+        "placeholder": 0.5,
+        "waiting_for_gps": 0.25,
+    }
+
+    scores = [
+        score_by_health.get(log.get("health"), 0.5)
+        for log in logs
+    ]
+
+    return sum(scores) / len(scores)
+
+
+def build_estimator_benchmark(logs, estimator_name):
+    if estimator_name == "raw_gps":
+        sample_count = len(logs)
+
+        return {
+            "sample_count": sample_count,
+            "avg_position_error": 0.0 if sample_count else None,
+            "max_position_error": 0.0 if sample_count else None,
+            "avg_velocity_error": 0.0 if sample_count else None,
+            "max_velocity_error": 0.0 if sample_count else None,
+            "avg_innovation": None,
+            "avg_covariance_trace": None,
+            "health_score": 1.0 if sample_count else None,
+        }
+
+    return {
+        "sample_count": len(logs),
+        "avg_position_error": safe_average(
+            position_error_from_log(log) for log in logs
+        ),
+        "max_position_error": safe_max(
+            position_error_from_log(log) for log in logs
+        ),
+        "avg_velocity_error": safe_average(
+            velocity_error_from_log(log) for log in logs
+        ),
+        "max_velocity_error": safe_max(
+            velocity_error_from_log(log) for log in logs
+        ),
+        "avg_innovation": safe_average(
+            log.get("innovation") for log in logs
+        ),
+        "avg_covariance_trace": safe_average(
+            log.get("covariance_trace") for log in logs
+        ),
+        "health_score": health_score(logs),
+    }
+
+
+def build_state_estimation_benchmark():
+    ekf_logs = read_ekf_logs(limit=100000)
+    ukf_logs = read_ukf_logs(limit=100000)
+    observer_logs = read_observer_logs(limit=100000)
+    raw_logs = ekf_logs or ukf_logs or observer_logs
+    benchmarks = {
+        "raw_gps": build_estimator_benchmark(raw_logs, "raw_gps"),
+        "ekf": build_estimator_benchmark(ekf_logs, "ekf"),
+        "ukf": build_estimator_benchmark(ukf_logs, "ukf"),
+        "observer": build_estimator_benchmark(observer_logs, "observer"),
+    }
+    candidates = [
+        (name, data)
+        for name, data in benchmarks.items()
+        if name != "raw_gps" and data.get("sample_count", 0) > 0
+    ]
+
+    best_estimator = None
+
+    if candidates:
+        best_estimator = min(
+            candidates,
+            key=lambda item: (
+                item[1].get("avg_position_error")
+                if item[1].get("avg_position_error") is not None
+                else float("inf"),
+                -(
+                    item[1].get("health_score")
+                    if item[1].get("health_score") is not None
+                    else 0.0
+                )
+            )
+        )[0]
+
+    return {
+        "status": "success",
+        "message": "State estimation benchmark generated successfully",
+        "benchmark": benchmarks,
+        "best_estimator": best_estimator,
+        "research_placeholders": {
+            "sensor_fusion_metrics": "pending integration",
+            "gps_denied_estimation": "pending integration",
+            "imu_fusion": "pending integration",
+            "multi_sensor_fusion": "pending integration",
+        }
+    }
+
+
 def build_ekf_result():
     telemetry = get_latest_telemetry_data()
     latitude = telemetry.get("latitude", telemetry.get("lat"))
@@ -256,6 +392,8 @@ def build_ekf_result():
             "vx": None,
             "vy": None,
         },
+        "raw_velocity_x": velocity_x,
+        "raw_velocity_y": velocity_y,
         "innovation": None,
         "covariance_trace": None,
         "health": "waiting_for_gps",
@@ -316,6 +454,8 @@ def build_ukf_result():
             "vx": None,
             "vy": None,
         },
+        "raw_velocity_x": velocity_x,
+        "raw_velocity_y": velocity_y,
         "innovation": None,
         "covariance_trace": None,
         "health": "waiting_for_gps",
@@ -374,6 +514,8 @@ def build_observer_result():
             "vx": None,
             "vy": None,
         },
+        "raw_velocity_x": velocity_x,
+        "raw_velocity_y": velocity_y,
         "observer_gain": None,
         "estimation_error": None,
         "health": "waiting_for_gps",
@@ -638,6 +780,44 @@ def get_estimation_comparison_analytics():
             ),
         }
     }
+
+
+@router.get("/state-estimation/benchmark")
+def get_state_estimation_benchmark():
+    return build_state_estimation_benchmark()
+
+
+@router.get("/state-estimation/benchmark/export")
+def export_state_estimation_benchmark():
+    benchmark = build_state_estimation_benchmark()
+    fields = [
+        "estimator",
+        "sample_count",
+        "avg_position_error",
+        "max_position_error",
+        "avg_velocity_error",
+        "max_velocity_error",
+        "avg_innovation",
+        "avg_covariance_trace",
+        "health_score",
+        "best_estimator",
+    ]
+
+    with open(STATE_ESTIMATION_BENCHMARK_EXPORT_FILE, "w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fields)
+        writer.writeheader()
+
+        for estimator, metrics in benchmark["benchmark"].items():
+            row = {"estimator": estimator}
+            row.update(metrics)
+            row["best_estimator"] = benchmark.get("best_estimator")
+            writer.writerow(row)
+
+    return FileResponse(
+        STATE_ESTIMATION_BENCHMARK_EXPORT_FILE,
+        media_type="text/csv",
+        filename="state_estimation_benchmark_export.csv"
+    )
 
 
 @router.get("/state-estimation/status")

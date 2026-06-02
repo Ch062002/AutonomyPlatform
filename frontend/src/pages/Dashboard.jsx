@@ -21,6 +21,7 @@ import NavigationReplayPanel from "../components/NavigationReplayPanel";
 import StateEstimationPanel from "../components/StateEstimationPanel";
 import EkfAnalyticsPanel from "../components/EkfAnalyticsPanel";
 import EstimationComparisonPanel from "../components/EstimationComparisonPanel";
+import StateEstimationBenchmarkPanel from "../components/StateEstimationBenchmarkPanel";
 
 import {
   getBackendStatus,
@@ -399,7 +400,13 @@ function Dashboard() {
             </section>
 
             <section>
-              <SectionHeader label="Section D" title="Logs and Replay" />
+              <SectionHeader label="Section D" title="State Estimation Benchmark" />
+
+              <StateEstimationBenchmarkPanel />
+            </section>
+
+            <section>
+              <SectionHeader label="Section E" title="Logs and Replay" />
 
               <div
                 style={{

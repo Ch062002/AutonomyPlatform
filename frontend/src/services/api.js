@@ -157,6 +157,14 @@ export const getEstimationComparisonAnalytics = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/comparison/analytics`);
 };
 
+export const getStateEstimationBenchmark = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/benchmark`);
+};
+
+export const exportStateEstimationBenchmark = () => {
+  window.open(`${API_BASE_URL}/state-estimation/benchmark/export`, "_blank");
+};
+
 export const getStateEstimationLogs = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/logs`);
 };

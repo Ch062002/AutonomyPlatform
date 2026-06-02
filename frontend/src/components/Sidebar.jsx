@@ -5,7 +5,7 @@ function Sidebar() {
     { label: "Navigation" },
     {
       label: "State Estimation",
-      subItems: ["EKF", "UKF", "Comparison"]
+      subItems: ["EKF", "UKF", "Comparison", "Estimator Benchmark"]
     },
     { label: "Commands" },
     { label: "Mission" },

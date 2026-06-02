@@ -12,6 +12,7 @@ import MapPanel from "../components/MapPanel";
 import MissionStatusPanel from "../components/MissionStatusPanel";
 import GuidanceModePanel from "../components/GuidanceModePanel";
 import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
+import GuidanceAnalyticsPanel from "../components/GuidanceAnalyticsPanel";
 
 import {
   getBackendStatus,
@@ -323,6 +324,10 @@ function Dashboard() {
 
               <div style={{ marginTop: "2rem" }}>
                 <GuidanceLogsPanel />
+              </div>
+
+              <div style={{ marginTop: "2rem" }}>
+                <GuidanceAnalyticsPanel />
               </div>
 
               <div style={{ marginTop: "2rem" }}>

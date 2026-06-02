@@ -103,6 +103,10 @@ export const getGuidanceLogs = () => {
   return axios.get(`${API_BASE_URL}/guidance/logs`);
 };
 
+export const getGuidanceAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/guidance/analytics`);
+};
+
 export const clearGuidanceLogs = () => {
   return axios.post(`${API_BASE_URL}/guidance/logs/clear`);
 };

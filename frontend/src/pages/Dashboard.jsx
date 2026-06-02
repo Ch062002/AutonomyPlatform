@@ -300,16 +300,11 @@ function Dashboard() {
             <div>
               <TelemetryCard telemetry={telemetry} />
 
-              <div
-                style={{
-                  marginTop: "1.6rem",
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-                  gap: "1.6rem",
-                  alignItems: "start"
-                }}
-              >
+              <div style={{ marginTop: "1.6rem" }}>
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
+              </div>
+
+              <div style={{ marginTop: "1.6rem" }}>
                 <TelemetryCharts history={telemetryHistory} />
               </div>
 
@@ -317,21 +312,16 @@ function Dashboard() {
                 <CommandPanel addCommandLog={addCommandLog} />
               </div>
 
-              <div
-                style={{
-                  marginTop: "1.6rem",
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                  gap: "1.6rem",
-                  alignItems: "start"
-                }}
-              >
-                <MissionReplayPanel />
+              <div style={{ marginTop: "1.6rem" }}>
                 <GuidanceLogsPanel />
               </div>
 
               <div style={{ marginTop: "1.6rem" }}>
                 <GuidanceAnalyticsPanel />
+              </div>
+
+              <div style={{ marginTop: "1.6rem" }}>
+                <MissionReplayPanel />
               </div>
             </div>
 

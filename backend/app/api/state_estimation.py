@@ -6,10 +6,15 @@ from datetime import datetime, timezone
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
+from app.state_estimation.ekf import SimpleEKF
+
 router = APIRouter()
 
 STATE_ESTIMATION_LOG_FILE = "/tmp/state_estimation_log.jsonl"
 STATE_ESTIMATION_EXPORT_FILE = "/tmp/state_estimation_export.csv"
+EKF_LOG_FILE = "/tmp/ekf_log.jsonl"
+
+ekf_filter = SimpleEKF()
 
 STATE_ESTIMATION_LOG_FIELDS = [
     "timestamp",
@@ -62,12 +67,158 @@ def build_filter_placeholder(name):
     }
 
 
+def is_valid_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def get_velocity_components(telemetry):
+    velocity_x = telemetry.get("velocity_x", telemetry.get("vx"))
+    velocity_y = telemetry.get("velocity_y", telemetry.get("vy"))
+
+    if is_valid_number(velocity_x) and is_valid_number(velocity_y):
+        return velocity_x, velocity_y
+
+    velocity = telemetry.get("velocity")
+
+    if is_valid_number(velocity):
+        return velocity, 0.0
+
+    return 0.0, 0.0
+
+
+def append_ekf_log(result):
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        **result,
+    }
+
+    with open(EKF_LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
+def read_ekf_logs(limit=100000):
+    if not os.path.exists(EKF_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(EKF_LOG_FILE, "r") as f:
+        lines = f.readlines()[-limit:]
+
+    for line in lines:
+        try:
+            logs.append(json.loads(line))
+        except Exception:
+            continue
+
+    return logs
+
+
+def safe_numeric_values(values):
+    numeric_values = []
+
+    for value in values:
+        if is_valid_number(value):
+            numeric_values.append(value)
+
+    return numeric_values
+
+
+def safe_average(values):
+    numeric_values = safe_numeric_values(values)
+
+    if not numeric_values:
+        return None
+
+    return sum(numeric_values) / len(numeric_values)
+
+
+def safe_max(values):
+    numeric_values = safe_numeric_values(values)
+
+    if not numeric_values:
+        return None
+
+    return max(numeric_values)
+
+
+def build_ekf_result():
+    telemetry = get_latest_telemetry_data()
+    latitude = telemetry.get("latitude", telemetry.get("lat"))
+    longitude = telemetry.get("longitude", telemetry.get("lon"))
+    velocity_x, velocity_y = get_velocity_components(telemetry)
+
+    result = {
+        "enabled": True,
+        "status": "running",
+        "raw_position": {
+            "x": latitude,
+            "y": longitude,
+            "latitude": latitude,
+            "longitude": longitude,
+        },
+        "estimated_position": {
+            "x": None,
+            "y": None,
+        },
+        "estimated_velocity": {
+            "vx": None,
+            "vy": None,
+        },
+        "innovation": None,
+        "covariance_trace": None,
+        "health": "waiting_for_gps",
+        "ukf": build_filter_placeholder("UKF"),
+        "complementary_filter": build_filter_placeholder("Complementary Filter"),
+        "observer": build_filter_placeholder("Observer"),
+    }
+
+    if not is_valid_number(latitude) or not is_valid_number(longitude):
+        return result
+
+    ekf_update = ekf_filter.update(
+        latitude,
+        longitude,
+        velocity_x,
+        velocity_y
+    )
+
+    result["estimated_position"] = {
+        "x": ekf_update["estimated_x"],
+        "y": ekf_update["estimated_y"],
+    }
+    result["estimated_velocity"] = {
+        "vx": ekf_update["estimated_vx"],
+        "vy": ekf_update["estimated_vy"],
+    }
+    result["innovation"] = ekf_update["innovation"]
+    result["covariance_trace"] = ekf_update["covariance_trace"]
+    result["health"] = (
+        "healthy"
+        if ekf_update["covariance_trace"] < 30.0
+        else "converging"
+    )
+
+    return result
+
+
 def build_state_estimation_status():
     telemetry = get_latest_telemetry_data()
+    ekf_result = build_ekf_result()
 
     return {
         "raw_gps": build_raw_gps_status(telemetry),
-        "ekf": build_filter_placeholder("EKF"),
+        "ekf": {
+            "enabled": ekf_result["enabled"],
+            "status": ekf_result["status"],
+            "output": {
+                "position": ekf_result["estimated_position"],
+                "velocity": ekf_result["estimated_velocity"],
+            },
+            "covariance": ekf_result["covariance_trace"],
+            "innovation": ekf_result["innovation"],
+            "health": ekf_result["health"],
+        },
         "ukf": build_filter_placeholder("UKF"),
         "observer": build_filter_placeholder("Observer"),
         "sensor_fusion": {
@@ -116,6 +267,35 @@ def read_state_estimation_logs(limit=100):
             continue
 
     return logs
+
+
+@router.get("/state-estimation/ekf")
+def get_ekf_status():
+    result = build_ekf_result()
+    append_ekf_log(result)
+    return result
+
+
+@router.get("/state-estimation/ekf/analytics")
+def get_ekf_analytics():
+    logs = read_ekf_logs(limit=100000)
+
+    return {
+        "status": "success",
+        "message": "EKF analytics generated successfully",
+        "analytics": {
+            "samples": len(logs),
+            "avg_innovation": safe_average(
+                log.get("innovation") for log in logs
+            ),
+            "max_innovation": safe_max(
+                log.get("innovation") for log in logs
+            ),
+            "avg_covariance_trace": safe_average(
+                log.get("covariance_trace") for log in logs
+            ),
+        }
+    }
 
 
 @router.get("/state-estimation/status")

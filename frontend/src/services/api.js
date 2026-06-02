@@ -133,6 +133,14 @@ export const getStateEstimationStatus = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/status`);
 };
 
+export const getEkfStatus = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/ekf`);
+};
+
+export const getEkfAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/ekf/analytics`);
+};
+
 export const getStateEstimationLogs = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/logs`);
 };

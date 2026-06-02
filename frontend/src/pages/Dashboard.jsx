@@ -19,6 +19,7 @@ import NavigationLogsPanel from "../components/NavigationLogsPanel";
 import NavigationAnalyticsPanel from "../components/NavigationAnalyticsPanel";
 import NavigationReplayPanel from "../components/NavigationReplayPanel";
 import StateEstimationPanel from "../components/StateEstimationPanel";
+import EkfAnalyticsPanel from "../components/EkfAnalyticsPanel";
 
 import {
   getBackendStatus,
@@ -42,6 +43,25 @@ function getTelemetryGpsPosition(data) {
   }
 
   return { lat: latitude, lon: longitude };
+}
+
+function SectionHeader({ label, title }) {
+  return (
+    <div style={{ marginBottom: "0.9rem" }}>
+      <div
+        style={{
+          color: "#38bdf8",
+          fontSize: "0.78rem",
+          fontWeight: "bold",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase"
+        }}
+      >
+        {label}
+      </div>
+      <h2 style={{ margin: "0.25rem 0 0 0" }}>{title}</h2>
+    </div>
+  );
 }
 
 function Dashboard() {
@@ -293,90 +313,106 @@ function Dashboard() {
             />
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1.75fr) minmax(340px, 0.95fr)",
-              gap: "1.6rem",
-              alignItems: "start"
-            }}
-          >
-            <div>
-              <TelemetryCard telemetry={telemetry} />
+          <div style={{ display: "grid", gap: "2rem" }}>
+            <section>
+              <SectionHeader label="Section A" title="Telemetry, Navigation, and State Estimation" />
 
-              <div style={{ marginTop: "1.6rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+                  gap: "1.4rem",
+                  alignItems: "start"
+                }}
+              >
+                <TelemetryCard telemetry={telemetry} />
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <NavigationAnalyticsPanel />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <NavigationReplayPanel />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
                 <StateEstimationPanel />
               </div>
 
-              <div style={{ marginTop: "1.6rem" }}>
-                <NavigationLogsPanel />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
+              <div style={{ marginTop: "1.4rem" }}>
                 <TelemetryCharts history={telemetryHistory} />
               </div>
+            </section>
 
-              <div style={{ marginTop: "1.6rem" }}>
+            <section>
+              <SectionHeader label="Section B" title="Mission Execution and Guidance Control" />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1.6fr) minmax(340px, 1fr)",
+                  gap: "1.4rem",
+                  alignItems: "start"
+                }}
+              >
+                <MapPanel
+                  telemetry={telemetry}
+                  mission={mission}
+                  trajectoryHistory={trajectoryHistory}
+                />
+
+                <div style={{ display: "grid", gap: "1.4rem" }}>
+                  <GuidanceModePanel addCommandLog={addCommandLog} />
+                  <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
+                  <VehicleHealthPanel telemetry={telemetry} />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+                  gap: "1.4rem",
+                  alignItems: "start",
+                  marginTop: "1.4rem"
+                }}
+              >
                 <CommandPanel addCommandLog={addCommandLog} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <GuidanceLogsPanel />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <GuidanceAnalyticsPanel />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <MissionReplayPanel />
-              </div>
-            </div>
-
-            <div>
-              <MapPanel
-                telemetry={telemetry}
-                mission={mission}
-                trajectoryHistory={trajectoryHistory}
-              />
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <GuidanceModePanel addCommandLog={addCommandLog} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <VehicleHealthPanel telemetry={telemetry} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
-                <CommandLog logs={commandLogs} />
-              </div>
-
-              <div style={{ marginTop: "1.6rem" }}>
                 <MissionPanel
                   mission={mission}
                   createDemoMission={createDemoMission}
                   resetMission={resetMission}
                   startMission={startMission}
                 />
+                <CommandLog logs={commandLogs} />
               </div>
-            </div>
+            </section>
+
+            <section>
+              <SectionHeader label="Section C" title="Guidance, Navigation, and EKF Analytics" />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+                  gap: "1.4rem",
+                  alignItems: "start"
+                }}
+              >
+                <GuidanceAnalyticsPanel />
+                <NavigationAnalyticsPanel />
+                <EkfAnalyticsPanel />
+              </div>
+            </section>
+
+            <section>
+              <SectionHeader label="Section D" title="Logs and Replay" />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                  gap: "1.4rem",
+                  alignItems: "start"
+                }}
+              >
+                <GuidanceLogsPanel />
+                <NavigationLogsPanel />
+                <MissionReplayPanel />
+                <NavigationReplayPanel />
+              </div>
+            </section>
           </div>
         </section>
       </main>

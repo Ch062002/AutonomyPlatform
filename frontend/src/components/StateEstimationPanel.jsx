@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { getStateEstimationStatus } from "../services/api";
+import {
+  getEkfStatus,
+  getStateEstimationStatus
+} from "../services/api";
 
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined || value === "") {
@@ -59,13 +62,20 @@ function filterColor(filter) {
 
 function StateEstimationPanel() {
   const [status, setStatus] = useState(null);
+  const [ekf, setEkf] = useState(null);
 
   const fetchStatus = async () => {
     try {
-      const r = await getStateEstimationStatus();
-      setStatus(r.data || null);
+      const [statusResponse, ekfResponse] = await Promise.all([
+        getStateEstimationStatus(),
+        getEkfStatus()
+      ]);
+
+      setStatus(statusResponse.data || null);
+      setEkf(ekfResponse.data || null);
     } catch {
       setStatus(null);
+      setEkf(null);
     }
   };
 
@@ -77,6 +87,8 @@ function StateEstimationPanel() {
 
   const rawGps = status?.raw_gps || {};
   const sensorFusion = status?.sensor_fusion || {};
+  const ekfPosition = ekf?.estimated_position || {};
+  const ekfVelocity = ekf?.estimated_velocity || {};
 
   return (
     <div>
@@ -105,8 +117,8 @@ function StateEstimationPanel() {
           />
           <StatusTile
             label="EKF Status"
-            value={filterStatus(status?.ekf)}
-            color={filterColor(status?.ekf)}
+            value={ekf?.status || filterStatus(status?.ekf)}
+            color={ekf?.enabled ? "#22c55e" : filterColor(status?.ekf)}
           />
           <StatusTile
             label="UKF Status"
@@ -145,6 +157,31 @@ function StateEstimationPanel() {
             label="GPS Velocity"
             value={formatValue(rawGps.velocity, " m/s")}
           />
+          <StatusTile
+            label="EKF Position"
+            value={`${formatValue(ekfPosition.x)}, ${formatValue(ekfPosition.y)}`}
+            color="#38bdf8"
+          />
+          <StatusTile
+            label="EKF Velocity"
+            value={`${formatValue(ekfVelocity.vx, " m/s")}, ${formatValue(ekfVelocity.vy, " m/s")}`}
+            color="#38bdf8"
+          />
+          <StatusTile
+            label="Innovation"
+            value={formatValue(ekf?.innovation)}
+            color="#f59e0b"
+          />
+          <StatusTile
+            label="Covariance Trace"
+            value={formatValue(ekf?.covariance_trace)}
+            color="#a78bfa"
+          />
+          <StatusTile
+            label="EKF Health"
+            value={ekf?.health || "--"}
+            color={ekf?.health === "healthy" ? "#22c55e" : "#f59e0b"}
+          />
         </div>
 
         <div
@@ -157,7 +194,7 @@ function StateEstimationPanel() {
             color: "#94a3b8"
           }}
         >
-          EKF/UKF module coming soon
+          UKF, Complementary Filter, and Observer modules are staged as placeholders.
         </div>
       </div>
     </div>

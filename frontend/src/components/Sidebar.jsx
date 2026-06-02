@@ -3,6 +3,7 @@ function Sidebar() {
     "Dashboard",
     "Telemetry",
     "Navigation",
+    "State Estimation",
     "Commands",
     "Mission",
     "Maps",

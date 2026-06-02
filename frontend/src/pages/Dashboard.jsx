@@ -17,6 +17,8 @@ import MissionReplayPanel from "../components/MissionReplayPanel";
 import NavigationStatusPanel from "../components/NavigationStatusPanel";
 import NavigationLogsPanel from "../components/NavigationLogsPanel";
 import NavigationAnalyticsPanel from "../components/NavigationAnalyticsPanel";
+import NavigationReplayPanel from "../components/NavigationReplayPanel";
+import StateEstimationPlaceholderPanel from "../components/StateEstimationPlaceholderPanel";
 
 import {
   getBackendStatus,
@@ -308,6 +310,14 @@ function Dashboard() {
 
               <div style={{ marginTop: "1.6rem" }}>
                 <NavigationAnalyticsPanel />
+              </div>
+
+              <div style={{ marginTop: "1.6rem" }}>
+                <NavigationReplayPanel />
+              </div>
+
+              <div style={{ marginTop: "1.6rem" }}>
+                <StateEstimationPlaceholderPanel />
               </div>
 
               <div style={{ marginTop: "1.6rem" }}>

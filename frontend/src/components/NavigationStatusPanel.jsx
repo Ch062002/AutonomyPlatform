@@ -98,12 +98,22 @@ function NavigationStatusPanel({ telemetry, mission }) {
       color: navigationHealthy ? "#22c55e" : "#f59e0b"
     },
     {
-      label: "State Estimator",
+      label: "EKF Status",
       value: "Pending integration",
       color: "#94a3b8"
     },
     {
-      label: "EKF Status",
+      label: "UKF Status",
+      value: "Pending integration",
+      color: "#94a3b8"
+    },
+    {
+      label: "Observer Status",
+      value: "Pending integration",
+      color: "#94a3b8"
+    },
+    {
+      label: "Sensor Fusion",
       value: "Pending integration",
       color: "#94a3b8"
     },

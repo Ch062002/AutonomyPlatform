@@ -612,6 +612,51 @@ def get_navigation_analytics():
     }
 
 
+@router.get("/navigation/replay")
+def get_navigation_replay(index: int = 0):
+    logs = read_navigation_logs(limit=500)
+    total_samples = len(logs)
+
+    if total_samples == 0:
+        return {
+            "status": "success",
+            "message": "No navigation logs available for replay",
+            "replay": {
+                "current_index": 0,
+                "total_samples": 0,
+                "last_index": 0,
+                "current_sample": None,
+                "timestamps": [],
+                "navigation_state_history": [],
+                "samples": []
+            }
+        }
+
+    current_index = max(0, min(index, total_samples - 1))
+
+    return {
+        "status": "success",
+        "message": "Navigation replay generated successfully",
+        "replay": {
+            "current_index": current_index,
+            "total_samples": total_samples,
+            "last_index": total_samples - 1,
+            "current_sample": logs[current_index],
+            "timestamps": [log.get("timestamp") for log in logs],
+            "navigation_state_history": [
+                {
+                    "timestamp": log.get("timestamp"),
+                    "nav_state": log.get("nav_state", log.get("flight_mode")),
+                    "navigation_health": log.get("navigation_health"),
+                    "failsafe": log.get("failsafe"),
+                }
+                for log in logs
+            ],
+            "samples": logs
+        }
+    }
+
+
 @router.post("/navigation/logs/clear")
 def clear_navigation_logs():
     if os.path.exists(NAVIGATION_LOG_FILE):

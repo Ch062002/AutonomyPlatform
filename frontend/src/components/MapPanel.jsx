@@ -13,7 +13,10 @@ import GuidanceOverlay from "./GuidanceOverlay";
 function toLatLng(point) {
   if (!point) return null;
 
-  const lat = Array.isArray(point) ? point[0] : point.lat ?? point.latitude;
+  const lat = Array.isArray(point)
+    ? point[0]
+    : point.lat ?? point.latitude;
+
   const lon = Array.isArray(point)
     ? point[1]
     : point.lon ?? point.lng ?? point.longitude;
@@ -31,8 +34,7 @@ function toLatLng(point) {
 function MapPanel({ telemetry, mission, trajectoryHistory = [] }) {
   const defaultCenter = [47.3977, 8.5456];
 
-  const currentPosition =
-    toLatLng(telemetry) || defaultCenter;
+  const currentPosition = toLatLng(telemetry) || defaultCenter;
 
   const missionWaypoints =
     mission?.waypoints?.map(toLatLng).filter(Boolean) || [];
@@ -40,11 +42,12 @@ function MapPanel({ telemetry, mission, trajectoryHistory = [] }) {
   const flownTrajectory =
     trajectoryHistory.map(toLatLng).filter(Boolean);
 
+  const hasMissionPath = missionWaypoints.length > 1;
+  const hasFlownTrajectory = flownTrajectory.length > 1;
+
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>
-        Mission Map
-      </h2>
+      <h2 style={{ textAlign: "center" }}>Mission Map</h2>
 
       <div
         style={{
@@ -67,53 +70,58 @@ function MapPanel({ telemetry, mission, trajectoryHistory = [] }) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* UAV Marker */}
-
-          <Marker position={currentPosition}>
-            <Popup>
-              UAV Current Position
-            </Popup>
-          </Marker>
+          {/* Planned Mission Path */}
+          {hasMissionPath && (
+            <Polyline
+              positions={missionWaypoints}
+              pathOptions={{
+                color: "#60a5fa",
+                weight: 4,
+                opacity: 0.85,
+                dashArray: "8 6"
+              }}
+            />
+          )}
 
           {/* Actual UAV Trajectory */}
-
-          {flownTrajectory.length > 1 && (
+          {hasFlownTrajectory && (
             <Polyline
               positions={flownTrajectory}
               pathOptions={{
                 color: "#22d3ee",
                 weight: 4,
-                opacity: 0.9
+                opacity: 0.95
               }}
             />
           )}
 
-          {/* Mission Path */}
-
-          {missionWaypoints.length > 1 && (
-            <Polyline
-              positions={missionWaypoints}
-              pathOptions={{
-                color: "#60a5fa",
-                weight: 4
-              }}
-            />
-          )}
+          {/* UAV Current Position */}
+          <Marker position={currentPosition}>
+            <Popup>
+              UAV Current Position
+              <br />
+              Lat: {currentPosition[0].toFixed(6)}
+              <br />
+              Lon: {currentPosition[1].toFixed(6)}
+              <br />
+              Alt: {telemetry?.alt ?? "--"} m
+            </Popup>
+          </Marker>
 
           {/* Waypoint Markers */}
-
           {mission?.waypoints?.map((wp, index) => {
             const waypointPosition = toLatLng(wp);
 
             if (!waypointPosition) return null;
 
             return (
-              <Marker
-                key={index}
-                position={waypointPosition}
-              >
+              <Marker key={index} position={waypointPosition}>
                 <Popup>
                   WP{index + 1}
+                  <br />
+                  Lat: {waypointPosition[0].toFixed(6)}
+                  <br />
+                  Lon: {waypointPosition[1].toFixed(6)}
                   <br />
                   Altitude: {wp.alt} m
                 </Popup>
@@ -122,7 +130,6 @@ function MapPanel({ telemetry, mission, trajectoryHistory = [] }) {
           })}
 
           {/* Guidance Overlay */}
-
           <GuidanceOverlay mission={mission} />
         </MapContainer>
       </div>

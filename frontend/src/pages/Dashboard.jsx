@@ -10,7 +10,6 @@ import CommandLog from "../components/CommandLog";
 import VehicleHealthPanel from "../components/VehicleHealthPanel";
 import MapPanel from "../components/MapPanel";
 import MissionStatusPanel from "../components/MissionStatusPanel";
-import { uploadMission } from "../services/api";
 import GuidanceModePanel from "../components/GuidanceModePanel";
 import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
 
@@ -21,20 +20,21 @@ import {
   getGazeboStatus,
   getMissionUploadStatus,
   getMissionProgress,
-  resetMissionState
+  resetMissionState,
+  uploadMission
 } from "../services/api";
 
 const TRAJECTORY_HISTORY_LIMIT = 300;
 
 function getTelemetryGpsPosition(data) {
-  const latitude = Number(data?.latitude);
-  const longitude = Number(data?.longitude);
+  const latitude = Number(data?.latitude ?? data?.lat);
+  const longitude = Number(data?.longitude ?? data?.lon);
 
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return null;
   }
 
-  return [latitude, longitude];
+  return { lat: latitude, lon: longitude };
 }
 
 function Dashboard() {
@@ -86,6 +86,9 @@ function Dashboard() {
       name: "Demo Surveillance Mission",
       state: "Created",
       activeWaypoint: 0,
+      totalWaypoints: 3,
+      progress: 0,
+      lookaheadPoint: null,
       waypoints: [
         { lat: lat + 0.0005, lon: lon + 0.0005, alt: 20 },
         { lat: lat + 0.001, lon: lon - 0.0004, alt: 25 },
@@ -111,13 +114,13 @@ function Dashboard() {
       });
 
       setUploadStatus(null);
+      setTrajectoryHistory([]);
       addCommandLog("Mission state reset");
     } catch {
       addCommandLog("Mission reset failed");
     }
   };
 
-  
   const startMission = async () => {
     if (mission.waypoints.length === 0) {
       addCommandLog("Cannot start mission: no waypoints available");
@@ -133,7 +136,8 @@ function Dashboard() {
       setMission((prev) => ({
         ...prev,
         state: "Uploaded",
-        activeWaypoint: 0
+        activeWaypoint: 0,
+        progress: 0
       }));
 
       addCommandLog("Mission uploaded to ROS2. Start OFFBOARD to execute.");
@@ -223,10 +227,19 @@ function Dashboard() {
       setTelemetry((prev) => ({ ...prev, ...data }));
 
       if (gpsPosition) {
-        setTrajectoryHistory((prev) => [
-          ...prev,
-          gpsPosition
-        ].slice(-TRAJECTORY_HISTORY_LIMIT));
+        setTrajectoryHistory((prev) => {
+          const last = prev[prev.length - 1];
+
+          if (
+            last &&
+            Math.abs(last.lat - gpsPosition.lat) < 0.000001 &&
+            Math.abs(last.lon - gpsPosition.lon) < 0.000001
+          ) {
+            return prev;
+          }
+
+          return [...prev.slice(-TRAJECTORY_HISTORY_LIMIT), gpsPosition];
+        });
       }
 
       setTelemetryHistory((prev) => [
@@ -299,7 +312,7 @@ function Dashboard() {
                 mission={mission}
                 trajectoryHistory={trajectoryHistory}
               />
-              
+
               <div style={{ marginTop: "2rem" }}>
                 <GuidanceModePanel addCommandLog={addCommandLog} />
               </div>

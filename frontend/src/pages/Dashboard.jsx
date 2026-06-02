@@ -13,6 +13,7 @@ import MissionStatusPanel from "../components/MissionStatusPanel";
 import GuidanceModePanel from "../components/GuidanceModePanel";
 import GuidanceLogsPanel from "../components/GuidanceLogsPanel";
 import GuidanceAnalyticsPanel from "../components/GuidanceAnalyticsPanel";
+import MissionReplayPanel from "../components/MissionReplayPanel";
 
 import {
   getBackendStatus,
@@ -290,7 +291,7 @@ function Dashboard() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr",
+              gridTemplateColumns: "minmax(0, 1.75fr) minmax(340px, 0.95fr)",
               gap: "2rem",
               alignItems: "start"
             }}
@@ -304,6 +305,23 @@ function Dashboard() {
 
               <div style={{ marginTop: "2rem" }}>
                 <CommandPanel addCommandLog={addCommandLog} />
+              </div>
+
+              <div
+                style={{
+                  marginTop: "2rem",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: "2rem",
+                  alignItems: "start"
+                }}
+              >
+                <MissionReplayPanel />
+                <GuidanceLogsPanel />
+              </div>
+
+              <div style={{ marginTop: "2rem" }}>
+                <GuidanceAnalyticsPanel />
               </div>
             </div>
 
@@ -320,14 +338,6 @@ function Dashboard() {
 
               <div style={{ marginTop: "2rem" }}>
                 <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
-              </div>
-
-              <div style={{ marginTop: "2rem" }}>
-                <GuidanceLogsPanel />
-              </div>
-
-              <div style={{ marginTop: "2rem" }}>
-                <GuidanceAnalyticsPanel />
               </div>
 
               <div style={{ marginTop: "2rem" }}>

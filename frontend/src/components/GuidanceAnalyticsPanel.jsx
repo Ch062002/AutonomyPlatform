@@ -72,7 +72,7 @@ function GuidanceMetricChart({ title, color, data }) {
   return (
     <div
       style={{
-        marginTop: "0.8rem",
+        marginTop: 0,
         padding: "0.8rem",
         backgroundColor: "#0f172a",
         borderRadius: "8px",
@@ -166,8 +166,9 @@ function GuidanceAnalyticsPanel() {
           padding: "1rem",
           borderRadius: "14px",
           border: "1px solid #334155",
-          maxHeight: "520px",
-          overflowY: "auto"
+          maxHeight: "760px",
+          overflowY: "auto",
+          boxShadow: "0 0 15px rgba(59,130,246,0.15)"
         }}
       >
         <p style={{ color: "#94a3b8", marginTop: 0 }}>
@@ -188,14 +189,23 @@ function GuidanceAnalyticsPanel() {
           </div>
         ) : (
           <>
-            {chartDataByField.map((chart) => (
-              <GuidanceMetricChart
-                key={chart.key}
-                title={chart.title}
-                color={chart.color}
-                data={chart.data}
-              />
-            ))}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "0.8rem",
+                alignItems: "stretch"
+              }}
+            >
+              {chartDataByField.map((chart) => (
+                <GuidanceMetricChart
+                  key={chart.key}
+                  title={chart.title}
+                  color={chart.color}
+                  data={chart.data}
+                />
+              ))}
+            </div>
 
             {modes.map(([mode, metrics]) => (
               <div

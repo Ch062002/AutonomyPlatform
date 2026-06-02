@@ -56,6 +56,14 @@ GUIDANCE_LOG_FIELDS = [
     "turn_feasible",
 ]
 
+GUIDANCE_ANALYTICS_MODES = [
+    "DIRECT_WAYPOINT",
+    "LOS_GUIDANCE",
+    "PURE_PURSUIT",
+    "VECTOR_FIELD",
+    "DUBINS",
+]
+
 
 def read_json_file(path, default=None):
     if default is None:
@@ -132,6 +140,125 @@ def read_guidance_logs(limit=100):
             continue
 
     return logs
+
+
+def read_all_guidance_logs():
+    if not os.path.exists(GUIDANCE_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(GUIDANCE_LOG_FILE, "r") as f:
+        for line in f:
+            try:
+                logs.append(json.loads(line))
+            except Exception:
+                continue
+
+    return logs
+
+
+def safe_numeric_values(values):
+    numeric_values = []
+
+    for value in values:
+        if value is None or isinstance(value, bool):
+            continue
+
+        if isinstance(value, (int, float)):
+            numeric_values.append(value)
+
+    return numeric_values
+
+
+def safe_average(values):
+    numeric_values = safe_numeric_values(values)
+
+    if not numeric_values:
+        return None
+
+    return sum(numeric_values) / len(numeric_values)
+
+
+def safe_min(values):
+    numeric_values = safe_numeric_values(values)
+
+    if not numeric_values:
+        return None
+
+    return min(numeric_values)
+
+
+def safe_max(values):
+    numeric_values = safe_numeric_values(values)
+
+    if not numeric_values:
+        return None
+
+    return max(numeric_values)
+
+
+def group_logs_by_guidance_mode(logs):
+    grouped_logs = {mode: [] for mode in GUIDANCE_ANALYTICS_MODES}
+
+    for log in logs:
+        mode = log.get("guidance_mode")
+
+        if mode in grouped_logs:
+            grouped_logs[mode].append(log)
+
+    return grouped_logs
+
+
+def count_completed_waypoints(logs):
+    return sum(
+        1
+        for log in logs
+        if isinstance(log.get("progress_percent"), (int, float))
+        and log.get("progress_percent") >= 100
+    )
+
+
+def average_turn_feasible_ratio(logs):
+    turn_feasible_values = [
+        log.get("turn_feasible")
+        for log in logs
+        if isinstance(log.get("turn_feasible"), bool)
+    ]
+
+    if not turn_feasible_values:
+        return None
+
+    feasible_count = sum(1 for value in turn_feasible_values if value)
+    return feasible_count / len(turn_feasible_values)
+
+
+def build_mode_analytics(logs):
+    analytics = {
+        "samples": len(logs),
+        "avg_cross_track_error": safe_average(
+            log.get("cross_track_error") for log in logs
+        ),
+        "max_cross_track_error": safe_max(
+            log.get("cross_track_error") for log in logs
+        ),
+        "avg_distance_to_waypoint": safe_average(
+            log.get("distance_to_waypoint") for log in logs
+        ),
+        "min_distance_to_waypoint": safe_min(
+            log.get("distance_to_waypoint") for log in logs
+        ),
+        "avg_heading_error": safe_average(
+            log.get("heading_error") for log in logs
+        ),
+        "avg_path_length": safe_average(log.get("path_length") for log in logs),
+        "avg_progress_percent": safe_average(
+            log.get("progress_percent") for log in logs
+        ),
+        "completion_count": count_completed_waypoints(logs),
+    }
+
+    return analytics
 
 
 def set_mission_state(
@@ -251,6 +378,55 @@ def clear_guidance_logs():
     return {
         "status": "success",
         "message": "Guidance logs cleared successfully"
+    }
+
+
+@router.get("/guidance/analytics")
+def get_guidance_analytics():
+    logs = read_all_guidance_logs()
+
+    if not logs:
+        return {
+            "status": "success",
+            "message": "No guidance logs available for analytics",
+            "analytics": {}
+        }
+
+    grouped_logs = group_logs_by_guidance_mode(logs)
+    analytics = {}
+
+    for mode, mode_logs in grouped_logs.items():
+        if not mode_logs:
+            continue
+
+        mode_analytics = build_mode_analytics(mode_logs)
+
+        if mode == "DUBINS":
+            mode_analytics["average_turn_feasible_ratio"] = (
+                average_turn_feasible_ratio(mode_logs)
+            )
+
+        if mode == "VECTOR_FIELD":
+            mode_analytics["avg_field_strength"] = safe_average(
+                log.get("field_strength") for log in mode_logs
+            )
+
+        if mode == "PURE_PURSUIT":
+            mode_analytics["avg_pursuit_distance"] = safe_average(
+                log.get("pursuit_distance") for log in mode_logs
+            )
+
+        if mode == "DIRECT_WAYPOINT":
+            mode_analytics["avg_distance_to_target"] = safe_average(
+                log.get("distance_to_target") for log in mode_logs
+            )
+
+        analytics[mode] = mode_analytics
+
+    return {
+        "status": "success",
+        "message": "Guidance analytics generated successfully",
+        "analytics": analytics
     }
 
 

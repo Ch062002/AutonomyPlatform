@@ -18,7 +18,7 @@ import NavigationStatusPanel from "../components/NavigationStatusPanel";
 import NavigationLogsPanel from "../components/NavigationLogsPanel";
 import NavigationAnalyticsPanel from "../components/NavigationAnalyticsPanel";
 import NavigationReplayPanel from "../components/NavigationReplayPanel";
-import StateEstimationPlaceholderPanel from "../components/StateEstimationPlaceholderPanel";
+import StateEstimationPanel from "../components/StateEstimationPanel";
 
 import {
   getBackendStatus,
@@ -317,7 +317,7 @@ function Dashboard() {
               </div>
 
               <div style={{ marginTop: "1.6rem" }}>
-                <StateEstimationPlaceholderPanel />
+                <StateEstimationPanel />
               </div>
 
               <div style={{ marginTop: "1.6rem" }}>

@@ -15,6 +15,7 @@ from app.services.ros2_bridge import start_ros2_bridge
 import app.services.ros2_bridge as ros2_bridge
 from app.api.mission_upload import router as mission_upload_router
 from app.api.mission_progress import router as mission_progress_router
+from app.api.state_estimation import router as state_estimation_router
 
 
 app = FastAPI(
@@ -41,6 +42,7 @@ app.include_router(mission_router)
 app.include_router(command_router)
 app.include_router(mission_upload_router)
 app.include_router(mission_progress_router)
+app.include_router(state_estimation_router)
 
 @app.get("/")
 def root():

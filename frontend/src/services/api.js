@@ -129,6 +129,22 @@ export const exportNavigationLogs = () => {
   window.open(`${API_BASE_URL}/navigation/logs/export`, "_blank");
 };
 
+export const getStateEstimationStatus = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/status`);
+};
+
+export const getStateEstimationLogs = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/logs`);
+};
+
+export const clearStateEstimationLogs = () => {
+  return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
+};
+
+export const exportStateEstimationLogs = () => {
+  window.open(`${API_BASE_URL}/state-estimation/logs/export`, "_blank");
+};
+
 export const clearGuidanceLogs = () => {
   return axios.post(`${API_BASE_URL}/guidance/logs/clear`);
 };

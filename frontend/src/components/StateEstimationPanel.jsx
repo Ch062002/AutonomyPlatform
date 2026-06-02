@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   getEkfStatus,
   getEstimationComparison,
+  getObserverStatus,
   getStateEstimationStatus
 } from "../services/api";
 
@@ -64,22 +65,31 @@ function filterColor(filter) {
 function StateEstimationPanel() {
   const [status, setStatus] = useState(null);
   const [ekf, setEkf] = useState(null);
+  const [observer, setObserver] = useState(null);
   const [comparison, setComparison] = useState(null);
 
   const fetchStatus = async () => {
     try {
-      const [statusResponse, ekfResponse, comparisonResponse] = await Promise.all([
+      const [
+        statusResponse,
+        ekfResponse,
+        observerResponse,
+        comparisonResponse
+      ] = await Promise.all([
         getStateEstimationStatus(),
         getEkfStatus(),
+        getObserverStatus(),
         getEstimationComparison()
       ]);
 
       setStatus(statusResponse.data || null);
       setEkf(ekfResponse.data || null);
+      setObserver(observerResponse.data || null);
       setComparison(comparisonResponse.data || null);
     } catch {
       setStatus(null);
       setEkf(null);
+      setObserver(null);
       setComparison(null);
     }
   };
@@ -97,6 +107,17 @@ function StateEstimationPanel() {
   const ukf = comparison?.ukf || status?.ukf || {};
   const ukfPosition = ukf?.estimated_position || ukf?.output?.position || {};
   const ukfVelocity = ukf?.estimated_velocity || ukf?.output?.velocity || {};
+  const observerData = observer || comparison?.observer || status?.observer || {};
+  const observerPosition = (
+    observerData?.estimated_position ||
+    observerData?.output?.position ||
+    {}
+  );
+  const observerVelocity = (
+    observerData?.estimated_velocity ||
+    observerData?.output?.velocity ||
+    {}
+  );
   const comparisonMetrics = comparison?.comparison || {};
 
   return (
@@ -257,6 +278,16 @@ function StateEstimationPanel() {
                 color="#f59e0b"
               />
               <StatusTile
+                label="Observer Pos Diff"
+                value={formatValue(comparisonMetrics.observer_position_difference)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Observer Vel Diff"
+                value={formatValue(comparisonMetrics.observer_velocity_difference)}
+                color="#f59e0b"
+              />
+              <StatusTile
                 label="Fusion Status"
                 value={sensorFusion.status || "--"}
                 color={sensorFusion.enabled ? "#22c55e" : "#94a3b8"}
@@ -270,6 +301,48 @@ function StateEstimationPanel() {
                 label="Ready"
                 value={formatValue(status?.future_comparison_ready)}
                 color={status?.future_comparison_ready ? "#22c55e" : "#f59e0b"}
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ marginTop: 0 }}>Observer</h3>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+                gap: "0.7rem"
+              }}
+            >
+              <StatusTile
+                label="Status"
+                value={observerData?.status || filterStatus(status?.observer)}
+                color={observerData?.enabled ? "#22c55e" : filterColor(status?.observer)}
+              />
+              <StatusTile
+                label="Position"
+                value={`${formatValue(observerPosition.x)}, ${formatValue(observerPosition.y)}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Velocity"
+                value={`${formatValue(observerVelocity.vx, " m/s")}, ${formatValue(observerVelocity.vy, " m/s")}`}
+                color="#38bdf8"
+              />
+              <StatusTile
+                label="Observer Gain"
+                value={formatValue(observerData?.observer_gain)}
+                color="#a78bfa"
+              />
+              <StatusTile
+                label="Estimation Error"
+                value={formatValue(observerData?.estimation_error)}
+                color="#f59e0b"
+              />
+              <StatusTile
+                label="Health"
+                value={observerData?.health || "--"}
+                color={observerData?.health === "healthy" ? "#22c55e" : "#f59e0b"}
               />
             </div>
           </div>

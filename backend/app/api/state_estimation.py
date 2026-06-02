@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
 from app.state_estimation.ekf import SimpleEKF
+from app.state_estimation.observer import PlaceholderObserver
 from app.state_estimation.ukf import PlaceholderUKF
 
 router = APIRouter()
@@ -15,10 +16,12 @@ STATE_ESTIMATION_LOG_FILE = "/tmp/state_estimation_log.jsonl"
 STATE_ESTIMATION_EXPORT_FILE = "/tmp/state_estimation_export.csv"
 EKF_LOG_FILE = "/tmp/ekf_log.jsonl"
 UKF_LOG_FILE = "/tmp/ukf_log.jsonl"
+OBSERVER_LOG_FILE = "/tmp/observer_log.jsonl"
 ESTIMATION_COMPARISON_LOG_FILE = "/tmp/estimation_comparison_log.jsonl"
 
 ekf_filter = SimpleEKF()
 ukf_filter = PlaceholderUKF()
+observer_filter = PlaceholderObserver()
 
 STATE_ESTIMATION_LOG_FIELDS = [
     "timestamp",
@@ -110,6 +113,16 @@ def append_ukf_log(result):
         f.write(json.dumps(log_entry) + "\n")
 
 
+def append_observer_log(result):
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        **result,
+    }
+
+    with open(OBSERVER_LOG_FILE, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+
 def append_comparison_log(result):
     log_entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -145,6 +158,24 @@ def read_ukf_logs(limit=100000):
     logs = []
 
     with open(UKF_LOG_FILE, "r") as f:
+        lines = f.readlines()[-limit:]
+
+    for line in lines:
+        try:
+            logs.append(json.loads(line))
+        except Exception:
+            continue
+
+    return logs
+
+
+def read_observer_logs(limit=100000):
+    if not os.path.exists(OBSERVER_LOG_FILE):
+        return []
+
+    logs = []
+
+    with open(OBSERVER_LOG_FILE, "r") as f:
         lines = f.readlines()[-limit:]
 
     for line in lines:
@@ -320,6 +351,64 @@ def build_ukf_result():
     return result
 
 
+def build_observer_result():
+    telemetry = get_latest_telemetry_data()
+    latitude = telemetry.get("latitude", telemetry.get("lat"))
+    longitude = telemetry.get("longitude", telemetry.get("lon"))
+    velocity_x, velocity_y = get_velocity_components(telemetry)
+
+    result = {
+        "enabled": True,
+        "status": "placeholder",
+        "raw_position": {
+            "x": latitude,
+            "y": longitude,
+            "latitude": latitude,
+            "longitude": longitude,
+        },
+        "estimated_position": {
+            "x": None,
+            "y": None,
+        },
+        "estimated_velocity": {
+            "vx": None,
+            "vy": None,
+        },
+        "observer_gain": None,
+        "estimation_error": None,
+        "health": "waiting_for_gps",
+        "implementation": "placeholder_observer_framework",
+    }
+
+    if not is_valid_number(latitude) or not is_valid_number(longitude):
+        return result
+
+    observer_update = observer_filter.update(
+        latitude,
+        longitude,
+        velocity_x,
+        velocity_y
+    )
+
+    result["estimated_position"] = {
+        "x": observer_update["estimated_x"],
+        "y": observer_update["estimated_y"],
+    }
+    result["estimated_velocity"] = {
+        "vx": observer_update["estimated_vx"],
+        "vy": observer_update["estimated_vy"],
+    }
+    result["observer_gain"] = observer_update["observer_gain"]
+    result["estimation_error"] = observer_update["estimation_error"]
+    result["health"] = (
+        "healthy"
+        if observer_update["estimation_error"] < 1.0
+        else "converging"
+    )
+
+    return result
+
+
 def vector_difference_norm(first, second, keys):
     values = []
 
@@ -340,6 +429,7 @@ def build_estimation_comparison():
     telemetry = get_latest_telemetry_data()
     ekf_result = build_ekf_result()
     ukf_result = build_ukf_result()
+    observer_result = build_observer_result()
     ekf_innovation = ekf_result.get("innovation")
     ukf_innovation = ukf_result.get("innovation")
 
@@ -352,6 +442,7 @@ def build_estimation_comparison():
         "raw_gps": build_raw_gps_status(telemetry),
         "ekf": ekf_result,
         "ukf": ukf_result,
+        "observer": observer_result,
         "comparison": {
             "position_difference": vector_difference_norm(
                 ekf_result.get("estimated_position", {}),
@@ -364,6 +455,16 @@ def build_estimation_comparison():
                 ["vx", "vy"]
             ),
             "innovation_difference": innovation_difference,
+            "observer_position_difference": vector_difference_norm(
+                ekf_result.get("estimated_position", {}),
+                observer_result.get("estimated_position", {}),
+                ["x", "y"]
+            ),
+            "observer_velocity_difference": vector_difference_norm(
+                ekf_result.get("estimated_velocity", {}),
+                observer_result.get("estimated_velocity", {}),
+                ["vx", "vy"]
+            ),
         }
     }
 
@@ -372,6 +473,7 @@ def build_state_estimation_status():
     telemetry = get_latest_telemetry_data()
     ekf_result = build_ekf_result()
     ukf_result = build_ukf_result()
+    observer_result = build_observer_result()
 
     return {
         "raw_gps": build_raw_gps_status(telemetry),
@@ -397,7 +499,17 @@ def build_state_estimation_status():
             "innovation": ukf_result["innovation"],
             "health": ukf_result["health"],
         },
-        "observer": build_filter_placeholder("Observer"),
+        "observer": {
+            "enabled": observer_result["enabled"],
+            "status": observer_result["status"],
+            "output": {
+                "position": observer_result["estimated_position"],
+                "velocity": observer_result["estimated_velocity"],
+            },
+            "observer_gain": observer_result["observer_gain"],
+            "estimation_error": observer_result["estimation_error"],
+            "health": observer_result["health"],
+        },
         "sensor_fusion": {
             "enabled": False,
             "status": "placeholder",
@@ -460,6 +572,13 @@ def get_ukf_status():
     return result
 
 
+@router.get("/state-estimation/observer")
+def get_observer_status():
+    result = build_observer_result()
+    append_observer_log(result)
+    return result
+
+
 @router.get("/state-estimation/ekf/analytics")
 def get_ekf_analytics():
     logs = read_ekf_logs(limit=100000)
@@ -487,6 +606,7 @@ def get_estimation_comparison():
     result = build_estimation_comparison()
     append_ekf_log(result["ekf"])
     append_ukf_log(result["ukf"])
+    append_observer_log(result["observer"])
     append_comparison_log(result)
     return result
 

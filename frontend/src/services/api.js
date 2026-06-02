@@ -141,6 +141,10 @@ export const getUkfStatus = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/ukf`);
 };
 
+export const getObserverStatus = () => {
+  return axios.get(`${API_BASE_URL}/state-estimation/observer`);
+};
+
 export const getEkfAnalytics = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/ekf/analytics`);
 };

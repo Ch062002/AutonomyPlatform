@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 
 import { getGuidanceAnalytics } from "../services/api";
 
@@ -18,6 +27,29 @@ const METRIC_FIELDS = [
   { key: "average_turn_feasible_ratio", label: "Turn Feasible Ratio" }
 ];
 
+const CHART_FIELDS = [
+  {
+    key: "avg_cross_track_error",
+    title: "Avg Cross Track Error",
+    color: "#38bdf8"
+  },
+  {
+    key: "avg_distance_to_waypoint",
+    title: "Avg Distance To Waypoint",
+    color: "#22c55e"
+  },
+  {
+    key: "avg_progress_percent",
+    title: "Avg Progress Percent",
+    color: "#f59e0b"
+  },
+  {
+    key: "completion_count",
+    title: "Completion Count",
+    color: "#a78bfa"
+  }
+];
+
 function formatMetricValue(value) {
   if (value === null || value === undefined || value === "") {
     return "--";
@@ -28,6 +60,69 @@ function formatMetricValue(value) {
   }
 
   return value;
+}
+
+function getNumericMetric(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function GuidanceMetricChart({ title, color, data }) {
+  const hasData = data.some((item) => item.value !== null);
+
+  return (
+    <div
+      style={{
+        marginTop: "0.8rem",
+        padding: "0.8rem",
+        backgroundColor: "#0f172a",
+        borderRadius: "8px",
+        border: "1px solid #334155"
+      }}
+    >
+      <strong style={{ fontSize: "0.95rem" }}>{title}</strong>
+
+      {hasData ? (
+        <div style={{ width: "100%", height: 220, marginTop: "0.7rem" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ top: 4, right: 14, bottom: 4, left: 8 }}
+            >
+              <CartesianGrid stroke="#334155" strokeDasharray="3 3" />
+              <XAxis
+                type="number"
+                stroke="#94a3b8"
+                tick={{ fill: "#94a3b8", fontSize: 11 }}
+              />
+              <YAxis
+                dataKey="mode"
+                type="category"
+                width={118}
+                stroke="#94a3b8"
+                tick={{ fill: "#cbd5e1", fontSize: 11 }}
+              />
+              <Tooltip
+                formatter={(value) => formatMetricValue(value)}
+                contentStyle={{
+                  backgroundColor: "#020617",
+                  border: "1px solid #334155",
+                  borderRadius: "8px",
+                  color: "#e2e8f0"
+                }}
+                cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
+              />
+              <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <p style={{ color: "#94a3b8", marginBottom: 0 }}>
+          No chart data
+        </p>
+      )}
+    </div>
+  );
 }
 
 function GuidanceAnalyticsPanel() {
@@ -53,6 +148,13 @@ function GuidanceAnalyticsPanel() {
   }, []);
 
   const modes = Object.entries(analytics);
+  const chartDataByField = CHART_FIELDS.map((field) => ({
+    ...field,
+    data: modes.map(([mode, metrics]) => ({
+      mode,
+      value: getNumericMetric(metrics?.[field.key])
+    }))
+  }));
 
   return (
     <div>
@@ -85,42 +187,53 @@ function GuidanceAnalyticsPanel() {
             No analytics available
           </div>
         ) : (
-          modes.map(([mode, metrics]) => (
-            <div
-              key={mode}
-              style={{
-                marginTop: "0.8rem",
-                padding: "0.8rem",
-                backgroundColor: "#0f172a",
-                borderRadius: "8px",
-                border: "1px solid #334155"
-              }}
-            >
-              <strong>{mode}</strong>
+          <>
+            {chartDataByField.map((chart) => (
+              <GuidanceMetricChart
+                key={chart.key}
+                title={chart.title}
+                color={chart.color}
+                data={chart.data}
+              />
+            ))}
 
+            {modes.map(([mode, metrics]) => (
               <div
+                key={mode}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: "0.45rem 0.8rem",
                   marginTop: "0.8rem",
-                  fontSize: "0.92rem"
+                  padding: "0.8rem",
+                  backgroundColor: "#0f172a",
+                  borderRadius: "8px",
+                  border: "1px solid #334155"
                 }}
               >
-                {METRIC_FIELDS.map((field) => (
-                  <div
-                    key={field.key}
-                    style={{ display: "contents" }}
-                  >
-                    <span style={{ color: "#94a3b8" }}>{field.label}</span>
-                    <span style={{ textAlign: "right", color: "#e2e8f0" }}>
-                      {formatMetricValue(metrics?.[field.key])}
-                    </span>
-                  </div>
-                ))}
+                <strong>{mode}</strong>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    gap: "0.45rem 0.8rem",
+                    marginTop: "0.8rem",
+                    fontSize: "0.92rem"
+                  }}
+                >
+                  {METRIC_FIELDS.map((field) => (
+                    <div
+                      key={field.key}
+                      style={{ display: "contents" }}
+                    >
+                      <span style={{ color: "#94a3b8" }}>{field.label}</span>
+                      <span style={{ textAlign: "right", color: "#e2e8f0" }}>
+                        {formatMetricValue(metrics?.[field.key])}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </>
         )}
       </div>
     </div>

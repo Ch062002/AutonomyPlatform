@@ -1,5 +1,5 @@
 function Sidebar() {
-  const activeControlItem = "SMC";
+  const activeControlItem = "MPC";
   const menuItems = [
     { label: "Dashboard" },
     { label: "Telemetry" },

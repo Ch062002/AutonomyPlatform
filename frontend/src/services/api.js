@@ -235,6 +235,22 @@ export const getSmcAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/smc/analytics`);
 };
 
+export const getMpcStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/mpc/status`);
+};
+
+export const getMpcConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/mpc/config`);
+};
+
+export const updateMpcConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/mpc/config`, config);
+};
+
+export const getMpcAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/mpc/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

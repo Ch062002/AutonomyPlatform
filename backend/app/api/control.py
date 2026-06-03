@@ -41,6 +41,16 @@ class SMCConfigUpdate(BaseModel):
     parameters: Dict[str, SMCAxisParameters]
 
 
+class MPCConfigUpdate(BaseModel):
+    prediction_horizon: Optional[int] = None
+    control_horizon: Optional[int] = None
+    dt: Optional[float] = None
+    q_weights: Optional[Dict[str, float]] = None
+    r_weights: Optional[Dict[str, float]] = None
+    input_limits: Optional[Dict[str, List[float]]] = None
+    state_limits: Optional[Dict[str, List[float]]] = None
+
+
 def get_latest_telemetry_data():
     try:
         import app.services.ros2_bridge as ros2_bridge
@@ -122,6 +132,31 @@ def build_smc_reference_from_telemetry():
     }
 
 
+def build_mpc_state_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "position_error": telemetry.get(
+            "cross_track_error",
+            telemetry.get("position_error", 0.0),
+        ),
+        "velocity": telemetry.get("velocity", 0.0),
+        "altitude": telemetry.get("altitude", telemetry.get("global_altitude", 0.0)),
+        "attitude": telemetry.get("heading", telemetry.get("yaw", 0.0)),
+    }
+
+
+def build_mpc_reference_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "position": 0.0,
+        "velocity": telemetry.get("target_velocity", telemetry.get("velocity", 0.0)),
+        "altitude": telemetry.get("target_altitude", telemetry.get("altitude", 0.0)),
+        "attitude": telemetry.get("desired_heading", telemetry.get("heading", 0.0)),
+    }
+
+
 def get_pid_controller():
     return controller_manager.controllers["PID"]
 
@@ -132,6 +167,10 @@ def get_lqr_controller():
 
 def get_smc_controller():
     return controller_manager.controllers["SMC"]
+
+
+def get_mpc_controller():
+    return controller_manager.controllers["MPC"]
 
 
 @router.get("/status")
@@ -247,3 +286,28 @@ def update_smc_config(config: SMCConfigUpdate):
 @router.get("/smc/analytics")
 def get_smc_analytics():
     return get_smc_controller().get_analytics()
+
+
+@router.get("/mpc/status")
+def get_mpc_status():
+    return get_mpc_controller().get_status(
+        state=build_mpc_state_from_telemetry(),
+        reference=build_mpc_reference_from_telemetry(),
+    )
+
+
+@router.get("/mpc/config")
+def get_mpc_config():
+    return get_mpc_controller().get_config()
+
+
+@router.post("/mpc/config")
+def update_mpc_config(config: MPCConfigUpdate):
+    return get_mpc_controller().update_config(
+        config.model_dump(exclude_none=True)
+    )
+
+
+@router.get("/mpc/analytics")
+def get_mpc_analytics():
+    return get_mpc_controller().get_analytics()

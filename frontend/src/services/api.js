@@ -183,6 +183,24 @@ export const selectControlController = (controllerName) => {
   });
 };
 
+export const getPidStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/pid/status`);
+};
+
+export const getPidConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/pid/config`);
+};
+
+export const updatePidConfig = (gains) => {
+  return axios.post(`${API_BASE_URL}/control/pid/config`, {
+    gains
+  });
+};
+
+export const getPidAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/pid/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

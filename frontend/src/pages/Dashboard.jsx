@@ -23,6 +23,7 @@ import EkfAnalyticsPanel from "../components/EkfAnalyticsPanel";
 import EstimationComparisonPanel from "../components/EstimationComparisonPanel";
 import StateEstimationBenchmarkPanel from "../components/StateEstimationBenchmarkPanel";
 import ControlStatusPanel from "../components/ControlStatusPanel";
+import PIDStatusPanel from "../components/PIDStatusPanel";
 
 import {
   getBackendStatus,
@@ -316,46 +317,37 @@ function Dashboard() {
             />
           </div>
 
-          <div className="dashboard-sections">
-            <section className="dashboard-section">
-              <SectionHeader label="Section A" title="Telemetry, Navigation, and State Estimation" />
-
-              <div
-                className="dashboard-grid dashboard-grid-three"
-              >
-                <TelemetryCard telemetry={telemetry} />
+          <div className="mission-workstation">
+            <section className="workstation-column">
+              <SectionHeader label="Left Column" title="Navigation, Estimation, and Health" />
+              <div className="dashboard-stack">
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
                 <StateEstimationPanel />
-              </div>
-
-              <div style={{ marginTop: "1.4rem" }}>
-                <TelemetryCharts history={telemetryHistory} />
+                <ControlStatusPanel addCommandLog={addCommandLog} />
+                <VehicleHealthPanel telemetry={telemetry} />
               </div>
             </section>
 
-            <section className="dashboard-section">
-              <SectionHeader label="Section B" title="Mission Execution, Guidance, and Control" />
+            <section className="workstation-column workstation-center">
+              <SectionHeader label="Center Column" title="Telemetry and Controller Analytics" />
+              <div className="dashboard-stack">
+                <TelemetryCard telemetry={telemetry} />
+                <TelemetryCharts history={telemetryHistory} />
+                <PIDStatusPanel addCommandLog={addCommandLog} />
+              </div>
+            </section>
 
-              <div
-                className="mission-control-grid"
-              >
+            <section className="workstation-column">
+              <SectionHeader label="Right Column" title="Mission Map, Guidance, and Execution" />
+              <div className="dashboard-stack">
                 <MapPanel
                   telemetry={telemetry}
                   mission={mission}
                   trajectoryHistory={trajectoryHistory}
                 />
-
-                <div className="dashboard-stack">
-                  <GuidanceModePanel addCommandLog={addCommandLog} />
-                  <ControlStatusPanel addCommandLog={addCommandLog} />
-                  <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
-                  <VehicleHealthPanel telemetry={telemetry} />
-                </div>
-              </div>
-
-              <div
-                className="dashboard-grid dashboard-grid-three section-followup"
-              >
+                <GuidanceModePanel addCommandLog={addCommandLog} />
+                <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
+                <GuidanceAnalyticsPanel />
                 <CommandPanel addCommandLog={addCommandLog} />
                 <MissionPanel
                   mission={mission}
@@ -363,42 +355,28 @@ function Dashboard() {
                   resetMission={resetMission}
                   startMission={startMission}
                 />
-                <CommandLog logs={commandLogs} />
-              </div>
-            </section>
-
-            <section className="dashboard-section">
-              <SectionHeader label="Section C" title="Guidance, Navigation, and Estimation Analytics" />
-
-              <div
-                className="dashboard-grid dashboard-grid-four"
-              >
-                <GuidanceAnalyticsPanel />
-                <NavigationAnalyticsPanel />
-                <EkfAnalyticsPanel />
-                <EstimationComparisonPanel />
-              </div>
-            </section>
-
-            <section className="dashboard-section">
-              <SectionHeader label="Section D" title="State Estimation Benchmark" />
-
-              <StateEstimationBenchmarkPanel />
-            </section>
-
-            <section className="dashboard-section">
-              <SectionHeader label="Section E" title="Logs and Replay" />
-
-              <div
-                className="dashboard-grid dashboard-grid-four"
-              >
-                <GuidanceLogsPanel />
-                <NavigationLogsPanel />
-                <MissionReplayPanel />
-                <NavigationReplayPanel />
               </div>
             </section>
           </div>
+
+          <section className="dashboard-bottom-section">
+            <SectionHeader label="Bottom Section" title="Replay, Logs, Benchmarking, and Comparisons" />
+
+            <div className="dashboard-grid dashboard-grid-four">
+              <MissionReplayPanel />
+              <NavigationReplayPanel />
+              <CommandLog logs={commandLogs} />
+              <NavigationAnalyticsPanel />
+              <GuidanceLogsPanel />
+              <NavigationLogsPanel />
+              <EkfAnalyticsPanel />
+              <EstimationComparisonPanel />
+            </div>
+
+            <div className="section-followup">
+              <StateEstimationBenchmarkPanel />
+            </div>
+          </section>
         </section>
       </main>
     </div>

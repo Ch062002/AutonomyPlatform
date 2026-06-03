@@ -70,9 +70,10 @@ function Sidebar() {
                   key={subItem}
                   style={{
                     padding: "0.45rem 0.7rem",
-                    color: "#94a3b8",
+                    color: subItem === "PID" ? "#38bdf8" : "#94a3b8",
                     fontSize: "0.9rem",
-                    borderLeft: "1px solid #334155"
+                    borderLeft: subItem === "PID" ? "2px solid #38bdf8" : "1px solid #334155",
+                    fontWeight: subItem === "PID" ? "bold" : "500"
                   }}
                 >
                   {subItem}

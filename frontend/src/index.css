@@ -31,7 +31,7 @@ body {
 
 .dashboard-container {
   width: 100%;
-  max-width: 1480px;
+  max-width: 1920px;
   margin: 0 auto;
 }
 
@@ -71,15 +71,6 @@ body {
   background: #7f1d1d;
 }
 
-.dashboard-sections {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.dashboard-section {
-  min-width: 0;
-}
-
 .dashboard-grid {
   display: grid;
   gap: 1rem;
@@ -94,11 +85,20 @@ body {
   grid-template-columns: repeat(4, minmax(240px, 1fr));
 }
 
-.mission-control-grid {
+.mission-workstation {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(360px, 0.9fr);
+  grid-template-columns: minmax(300px, 0.95fr) minmax(480px, 1.35fr) minmax(340px, 1.05fr);
   gap: 1rem;
   align-items: start;
+}
+
+.workstation-column,
+.dashboard-bottom-section {
+  min-width: 0;
+}
+
+.workstation-center {
+  min-width: 0;
 }
 
 .dashboard-stack {
@@ -106,8 +106,18 @@ body {
   gap: 1rem;
 }
 
+.dashboard-bottom-section {
+  margin-top: 1.5rem;
+}
+
 .section-followup {
   margin-top: 1rem;
+}
+
+@media (max-width: 1500px) {
+  .mission-workstation {
+    grid-template-columns: minmax(280px, 0.9fr) minmax(440px, 1.25fr) minmax(320px, 1fr);
+  }
 }
 
 @media (max-width: 1320px) {
@@ -116,8 +126,12 @@ body {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
   }
 
-  .mission-control-grid {
-    grid-template-columns: minmax(0, 1fr);
+  .mission-workstation {
+    grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.2fr);
+  }
+
+  .mission-workstation .workstation-column:nth-child(3) {
+    grid-column: 1 / -1;
   }
 }
 
@@ -139,5 +153,13 @@ body {
   .dashboard-grid-three,
   .dashboard-grid-four {
     grid-template-columns: 1fr;
+  }
+
+  .mission-workstation {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-workstation .workstation-column:nth-child(3) {
+    grid-column: auto;
   }
 }

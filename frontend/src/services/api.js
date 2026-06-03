@@ -217,6 +217,24 @@ export const getLqrAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/lqr/analytics`);
 };
 
+export const getSmcStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/smc/status`);
+};
+
+export const getSmcConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/smc/config`);
+};
+
+export const updateSmcConfig = (parameters) => {
+  return axios.post(`${API_BASE_URL}/control/smc/config`, {
+    parameters
+  });
+};
+
+export const getSmcAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/smc/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

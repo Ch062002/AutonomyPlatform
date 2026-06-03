@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, HTTPException
 
@@ -28,6 +28,17 @@ class LQRConfigUpdate(BaseModel):
     b_matrix: Optional[List[List[float]]] = None
     q_matrix: Optional[List[List[float]]] = None
     r_matrix: Optional[List[List[float]]] = None
+
+
+class SMCAxisParameters(BaseModel):
+    lambda_: Optional[float] = Field(default=None, alias="lambda")
+    k: Optional[float] = None
+    phi: Optional[float] = None
+    mode: Optional[str] = None
+
+
+class SMCConfigUpdate(BaseModel):
+    parameters: Dict[str, SMCAxisParameters]
 
 
 def get_latest_telemetry_data():
@@ -86,12 +97,41 @@ def build_lqr_reference_from_telemetry():
     }
 
 
+def build_smc_state_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "attitude": telemetry.get("heading", telemetry.get("yaw", 0.0)),
+        "altitude": telemetry.get("altitude", telemetry.get("global_altitude", 0.0)),
+        "velocity": telemetry.get("velocity", 0.0),
+        "position": telemetry.get(
+            "cross_track_error",
+            telemetry.get("position_error", 0.0),
+        ),
+    }
+
+
+def build_smc_reference_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "attitude": telemetry.get("desired_heading", telemetry.get("heading", 0.0)),
+        "altitude": telemetry.get("target_altitude", telemetry.get("altitude", 0.0)),
+        "velocity": telemetry.get("target_velocity", telemetry.get("velocity", 0.0)),
+        "position": 0.0,
+    }
+
+
 def get_pid_controller():
     return controller_manager.controllers["PID"]
 
 
 def get_lqr_controller():
     return controller_manager.controllers["LQR"]
+
+
+def get_smc_controller():
+    return controller_manager.controllers["SMC"]
 
 
 @router.get("/status")
@@ -174,3 +214,36 @@ def update_lqr_config(config: LQRConfigUpdate):
 @router.get("/lqr/analytics")
 def get_lqr_analytics():
     return get_lqr_controller().get_analytics()
+
+
+@router.get("/smc/status")
+def get_smc_status():
+    return get_smc_controller().get_status(
+        state=build_smc_state_from_telemetry(),
+        reference=build_smc_reference_from_telemetry(),
+    )
+
+
+@router.get("/smc/config")
+def get_smc_config():
+    return get_smc_controller().get_config()
+
+
+@router.post("/smc/config")
+def update_smc_config(config: SMCConfigUpdate):
+    parameters = {}
+
+    for axis, axis_parameters in config.parameters.items():
+        axis_dump = axis_parameters.model_dump(exclude_none=True)
+
+        if "lambda_" in axis_dump:
+            axis_dump["lambda"] = axis_dump.pop("lambda_")
+
+        parameters[axis] = axis_dump
+
+    return get_smc_controller().update_config(parameters)
+
+
+@router.get("/smc/analytics")
+def get_smc_analytics():
+    return get_smc_controller().get_analytics()

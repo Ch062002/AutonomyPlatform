@@ -25,6 +25,7 @@ import StateEstimationBenchmarkPanel from "../components/StateEstimationBenchmar
 import ControlStatusPanel from "../components/ControlStatusPanel";
 import PIDStatusPanel from "../components/PIDStatusPanel";
 import LQRStatusPanel from "../components/LQRStatusPanel";
+import SMCStatusPanel from "../components/SMCStatusPanel";
 
 import {
   getBackendStatus,
@@ -334,6 +335,7 @@ function Dashboard() {
               <div className="dashboard-stack">
                 <TelemetryCard telemetry={telemetry} />
                 <TelemetryCharts history={telemetryHistory} />
+                <SMCStatusPanel addCommandLog={addCommandLog} />
                 <LQRStatusPanel />
                 <PIDStatusPanel addCommandLog={addCommandLog} />
               </div>

@@ -255,6 +255,18 @@ export const getMpcAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/mpc/analytics`);
 };
 
+export const getControllerComparison = () => {
+  return axios.get(`${API_BASE_URL}/control/comparison`);
+};
+
+export const getControllerComparisonLogs = () => {
+  return axios.get(`${API_BASE_URL}/control/comparison/logs`);
+};
+
+export const exportControllerComparison = () => {
+  window.open(`${API_BASE_URL}/control/comparison/export`, "_blank");
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

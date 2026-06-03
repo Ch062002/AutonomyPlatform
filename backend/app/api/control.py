@@ -3,7 +3,13 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
+from app.control.controller_comparison import (
+    build_controller_comparison,
+    export_comparison_csv,
+    read_comparison_logs,
+)
 from app.control.controllers.controller_manager import controller_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
@@ -191,6 +197,28 @@ def get_control_controllers():
     }
     controller_manager.append_log("controllers", response)
     return response
+
+
+@router.get("/comparison")
+def get_controller_comparison():
+    return build_controller_comparison(controller_manager)
+
+
+@router.get("/comparison/logs")
+def get_controller_comparison_logs():
+    return {
+        "logs": read_comparison_logs(limit=100)
+    }
+
+
+@router.get("/comparison/export")
+def export_controller_comparison():
+    export_file = export_comparison_csv()
+    return FileResponse(
+        export_file,
+        media_type="text/csv",
+        filename="controller_comparison_export.csv",
+    )
 
 
 @router.get("/active")

@@ -1,5 +1,5 @@
 function Sidebar() {
-  const activeControlItem = "Controller Manager";
+  const activeControlItem = "Comparison";
   const menuItems = [
     { label: "Dashboard" },
     { label: "Telemetry" },
@@ -10,7 +10,7 @@ function Sidebar() {
     },
     {
       label: "Control",
-      subItems: ["PID", "LQR", "SMC", "MPC", "Controller Manager"]
+      subItems: ["PID", "LQR", "SMC", "MPC", "Controller Manager", "Comparison"]
     },
     { label: "Commands" },
     { label: "Mission" },

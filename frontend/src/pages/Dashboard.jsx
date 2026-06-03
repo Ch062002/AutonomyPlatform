@@ -28,6 +28,7 @@ import LQRStatusPanel from "../components/LQRStatusPanel";
 import SMCStatusPanel from "../components/SMCStatusPanel";
 import MPCStatusPanel from "../components/MPCStatusPanel";
 import ControllerSwitcherPanel from "../components/ControllerSwitcherPanel";
+import ControllerComparisonPanel from "../components/ControllerComparisonPanel";
 
 import {
   getBackendStatus,
@@ -369,6 +370,10 @@ function Dashboard() {
 
           <section className="dashboard-bottom-section">
             <SectionHeader label="Bottom Section" title="Replay, Logs, Benchmarking, and Comparisons" />
+
+            <div style={{ marginBottom: "1rem" }}>
+              <ControllerComparisonPanel />
+            </div>
 
             <div className="dashboard-grid dashboard-grid-four">
               <MissionReplayPanel />

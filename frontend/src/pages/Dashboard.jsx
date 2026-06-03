@@ -22,6 +22,7 @@ import StateEstimationPanel from "../components/StateEstimationPanel";
 import EkfAnalyticsPanel from "../components/EkfAnalyticsPanel";
 import EstimationComparisonPanel from "../components/EstimationComparisonPanel";
 import StateEstimationBenchmarkPanel from "../components/StateEstimationBenchmarkPanel";
+import ControlStatusPanel from "../components/ControlStatusPanel";
 
 import {
   getBackendStatus,
@@ -306,7 +307,7 @@ function Dashboard() {
             </div>
           </header>
 
-          <div style={{ marginBottom: "2rem" }}>
+          <div style={{ marginBottom: "1.5rem" }}>
             <StatusCard
               backendStatus={backendStatus}
               ros2Status={ros2Status}
@@ -315,17 +316,12 @@ function Dashboard() {
             />
           </div>
 
-          <div style={{ display: "grid", gap: "2rem" }}>
-            <section>
+          <div className="dashboard-sections">
+            <section className="dashboard-section">
               <SectionHeader label="Section A" title="Telemetry, Navigation, and State Estimation" />
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
-                  gap: "1.4rem",
-                  alignItems: "start"
-                }}
+                className="dashboard-grid dashboard-grid-three"
               >
                 <TelemetryCard telemetry={telemetry} />
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
@@ -337,16 +333,11 @@ function Dashboard() {
               </div>
             </section>
 
-            <section>
-              <SectionHeader label="Section B" title="Mission Execution and Guidance Control" />
+            <section className="dashboard-section">
+              <SectionHeader label="Section B" title="Mission Execution, Guidance, and Control" />
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(0, 1.6fr) minmax(340px, 1fr)",
-                  gap: "1.4rem",
-                  alignItems: "start"
-                }}
+                className="mission-control-grid"
               >
                 <MapPanel
                   telemetry={telemetry}
@@ -354,21 +345,16 @@ function Dashboard() {
                   trajectoryHistory={trajectoryHistory}
                 />
 
-                <div style={{ display: "grid", gap: "1.4rem" }}>
+                <div className="dashboard-stack">
                   <GuidanceModePanel addCommandLog={addCommandLog} />
+                  <ControlStatusPanel addCommandLog={addCommandLog} />
                   <MissionStatusPanel mission={mission} uploadStatus={uploadStatus} />
                   <VehicleHealthPanel telemetry={telemetry} />
                 </div>
               </div>
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
-                  gap: "1.4rem",
-                  alignItems: "start",
-                  marginTop: "1.4rem"
-                }}
+                className="dashboard-grid dashboard-grid-three section-followup"
               >
                 <CommandPanel addCommandLog={addCommandLog} />
                 <MissionPanel
@@ -381,16 +367,11 @@ function Dashboard() {
               </div>
             </section>
 
-            <section>
+            <section className="dashboard-section">
               <SectionHeader label="Section C" title="Guidance, Navigation, and Estimation Analytics" />
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
-                  gap: "1.4rem",
-                  alignItems: "start"
-                }}
+                className="dashboard-grid dashboard-grid-four"
               >
                 <GuidanceAnalyticsPanel />
                 <NavigationAnalyticsPanel />
@@ -399,22 +380,17 @@ function Dashboard() {
               </div>
             </section>
 
-            <section>
+            <section className="dashboard-section">
               <SectionHeader label="Section D" title="State Estimation Benchmark" />
 
               <StateEstimationBenchmarkPanel />
             </section>
 
-            <section>
+            <section className="dashboard-section">
               <SectionHeader label="Section E" title="Logs and Replay" />
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-                  gap: "1.4rem",
-                  alignItems: "start"
-                }}
+                className="dashboard-grid dashboard-grid-four"
               >
                 <GuidanceLogsPanel />
                 <NavigationLogsPanel />

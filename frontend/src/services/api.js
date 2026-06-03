@@ -169,6 +169,20 @@ export const getStateEstimationLogs = () => {
   return axios.get(`${API_BASE_URL}/state-estimation/logs`);
 };
 
+export const getControlStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/status`);
+};
+
+export const getControlControllers = () => {
+  return axios.get(`${API_BASE_URL}/control/controllers`);
+};
+
+export const selectControlController = (controllerName) => {
+  return axios.post(`${API_BASE_URL}/control/select`, {
+    controller_name: controllerName
+  });
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

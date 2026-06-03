@@ -7,6 +7,10 @@ function Sidebar() {
       label: "State Estimation",
       subItems: ["EKF", "UKF", "Comparison", "Estimator Benchmark"]
     },
+    {
+      label: "Control",
+      subItems: ["PID", "LQR", "SMC", "MPC"]
+    },
     { label: "Commands" },
     { label: "Mission" },
     { label: "Maps" },

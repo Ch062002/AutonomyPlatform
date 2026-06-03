@@ -10,7 +10,8 @@ router = APIRouter(prefix="/control", tags=["control"])
 
 
 class ControllerSelection(BaseModel):
-    controller_name: str
+    controller: Optional[str] = None
+    controller_name: Optional[str] = None
 
 
 class PIDAxisGains(BaseModel):
@@ -185,14 +186,22 @@ def get_control_controllers():
     response = {
         "supported_controllers": ["PID", "LQR", "SMC", "MPC"],
         "controllers": controller_manager.list_controllers(),
+        "active_controller": controller_manager.active_controller,
+        "future_ready": controller_manager.get_active_metadata()["future_ready"],
     }
     controller_manager.append_log("controllers", response)
     return response
 
 
+@router.get("/active")
+def get_active_controller():
+    return controller_manager.get_active_metadata()
+
+
 @router.post("/select")
 def select_control_controller(selection: ControllerSelection):
-    status = controller_manager.select_controller(selection.controller_name)
+    selected_controller = selection.controller or selection.controller_name
+    status = controller_manager.select_controller(selected_controller)
 
     if status is None:
         raise HTTPException(

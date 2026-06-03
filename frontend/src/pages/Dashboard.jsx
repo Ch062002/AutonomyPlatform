@@ -27,6 +27,7 @@ import PIDStatusPanel from "../components/PIDStatusPanel";
 import LQRStatusPanel from "../components/LQRStatusPanel";
 import SMCStatusPanel from "../components/SMCStatusPanel";
 import MPCStatusPanel from "../components/MPCStatusPanel";
+import ControllerSwitcherPanel from "../components/ControllerSwitcherPanel";
 
 import {
   getBackendStatus,
@@ -327,6 +328,7 @@ function Dashboard() {
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
                 <StateEstimationPanel />
                 <ControlStatusPanel addCommandLog={addCommandLog} />
+                <ControllerSwitcherPanel addCommandLog={addCommandLog} />
                 <VehicleHealthPanel telemetry={telemetry} />
               </div>
             </section>

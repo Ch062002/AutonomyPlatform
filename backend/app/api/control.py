@@ -11,6 +11,7 @@ from app.control.controller_comparison import (
     read_comparison_logs,
 )
 from app.control.controllers.controller_manager import controller_manager
+from app.control.disturbance_testing import disturbance_testing_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
 
@@ -56,6 +57,10 @@ class MPCConfigUpdate(BaseModel):
     r_weights: Optional[Dict[str, float]] = None
     input_limits: Optional[Dict[str, List[float]]] = None
     state_limits: Optional[Dict[str, List[float]]] = None
+
+
+class DisturbanceApplyRequest(BaseModel):
+    scenario_name: str
 
 
 def get_latest_telemetry_data():
@@ -219,6 +224,42 @@ def export_controller_comparison():
         media_type="text/csv",
         filename="controller_comparison_export.csv",
     )
+
+
+@router.get("/disturbance/scenarios")
+def get_disturbance_scenarios():
+    return disturbance_testing_manager.list_scenarios()
+
+
+@router.post("/disturbance/apply")
+def apply_disturbance(request: DisturbanceApplyRequest):
+    status = disturbance_testing_manager.apply(
+        request.scenario_name,
+        controller_manager,
+    )
+
+    if status is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported disturbance scenario.",
+        )
+
+    return status
+
+
+@router.post("/disturbance/clear")
+def clear_disturbance():
+    return disturbance_testing_manager.clear(controller_manager)
+
+
+@router.get("/disturbance/status")
+def get_disturbance_status():
+    return disturbance_testing_manager.status(controller_manager)
+
+
+@router.get("/disturbance/analytics")
+def get_disturbance_analytics():
+    return disturbance_testing_manager.analytics(controller_manager)
 
 
 @router.get("/active")

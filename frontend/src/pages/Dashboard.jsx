@@ -29,6 +29,7 @@ import SMCStatusPanel from "../components/SMCStatusPanel";
 import MPCStatusPanel from "../components/MPCStatusPanel";
 import ControllerSwitcherPanel from "../components/ControllerSwitcherPanel";
 import ControllerComparisonPanel from "../components/ControllerComparisonPanel";
+import DisturbanceTestingPanel from "../components/DisturbanceTestingPanel";
 
 import {
   getBackendStatus,
@@ -371,8 +372,16 @@ function Dashboard() {
           <section className="dashboard-bottom-section">
             <SectionHeader label="Bottom Section" title="Replay, Logs, Benchmarking, and Comparisons" />
 
-            <div style={{ marginBottom: "1rem" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+                gap: "1rem",
+                marginBottom: "1rem"
+              }}
+            >
               <ControllerComparisonPanel />
+              <DisturbanceTestingPanel addCommandLog={addCommandLog} />
             </div>
 
             <div className="dashboard-grid dashboard-grid-four">

@@ -267,6 +267,28 @@ export const exportControllerComparison = () => {
   window.open(`${API_BASE_URL}/control/comparison/export`, "_blank");
 };
 
+export const getDisturbanceScenarios = () => {
+  return axios.get(`${API_BASE_URL}/control/disturbance/scenarios`);
+};
+
+export const applyDisturbanceScenario = (scenarioName) => {
+  return axios.post(`${API_BASE_URL}/control/disturbance/apply`, {
+    scenario_name: scenarioName
+  });
+};
+
+export const clearDisturbanceScenario = () => {
+  return axios.post(`${API_BASE_URL}/control/disturbance/clear`);
+};
+
+export const getDisturbanceStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/disturbance/status`);
+};
+
+export const getDisturbanceAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/disturbance/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

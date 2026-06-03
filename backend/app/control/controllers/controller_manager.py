@@ -23,13 +23,13 @@ class ControllerManager:
             "SMC": SMCController(),
             "MPC": MPCController(),
         }
-        self.active_controller = "PID"
+        self.active_controller = "LQR"
 
     def list_controllers(self):
         return [
             {
                 "controller_name": name,
-                "status": "placeholder",
+                "status": "active" if name in ("PID", "LQR") else "placeholder",
                 "health": "ready",
                 "active": name == self.active_controller,
                 "supported_control_axes": CONTROL_AXES,

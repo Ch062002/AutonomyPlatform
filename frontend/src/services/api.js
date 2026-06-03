@@ -201,6 +201,22 @@ export const getPidAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/pid/analytics`);
 };
 
+export const getLqrStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/lqr/status`);
+};
+
+export const getLqrConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/lqr/config`);
+};
+
+export const updateLqrConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/lqr/config`, config);
+};
+
+export const getLqrAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/lqr/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

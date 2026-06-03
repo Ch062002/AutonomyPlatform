@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -21,6 +21,13 @@ class PIDAxisGains(BaseModel):
 
 class PIDConfigUpdate(BaseModel):
     gains: Dict[str, PIDAxisGains]
+
+
+class LQRConfigUpdate(BaseModel):
+    a_matrix: Optional[List[List[float]]] = None
+    b_matrix: Optional[List[List[float]]] = None
+    q_matrix: Optional[List[List[float]]] = None
+    r_matrix: Optional[List[List[float]]] = None
 
 
 def get_latest_telemetry_data():
@@ -54,8 +61,37 @@ def build_pid_reference_from_telemetry():
     }
 
 
+def build_lqr_state_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "position_error": telemetry.get(
+            "cross_track_error",
+            telemetry.get("position_error", 0.0),
+        ),
+        "velocity": telemetry.get("velocity", 0.0),
+        "altitude": telemetry.get("altitude", telemetry.get("global_altitude", 0.0)),
+        "attitude": telemetry.get("heading", telemetry.get("yaw", 0.0)),
+    }
+
+
+def build_lqr_reference_from_telemetry():
+    telemetry = get_latest_telemetry_data()
+
+    return {
+        "position": 0.0,
+        "velocity": telemetry.get("target_velocity", telemetry.get("velocity", 0.0)),
+        "altitude": telemetry.get("target_altitude", telemetry.get("altitude", 0.0)),
+        "attitude": telemetry.get("desired_heading", telemetry.get("heading", 0.0)),
+    }
+
+
 def get_pid_controller():
     return controller_manager.controllers["PID"]
+
+
+def get_lqr_controller():
+    return controller_manager.controllers["LQR"]
 
 
 @router.get("/status")
@@ -113,3 +149,28 @@ def update_pid_config(config: PIDConfigUpdate):
 @router.get("/pid/analytics")
 def get_pid_analytics():
     return get_pid_controller().get_analytics()
+
+
+@router.get("/lqr/status")
+def get_lqr_status():
+    return get_lqr_controller().get_status(
+        state=build_lqr_state_from_telemetry(),
+        reference=build_lqr_reference_from_telemetry(),
+    )
+
+
+@router.get("/lqr/config")
+def get_lqr_config():
+    return get_lqr_controller().get_config()
+
+
+@router.post("/lqr/config")
+def update_lqr_config(config: LQRConfigUpdate):
+    return get_lqr_controller().update_config(
+        config.model_dump(exclude_none=True)
+    )
+
+
+@router.get("/lqr/analytics")
+def get_lqr_analytics():
+    return get_lqr_controller().get_analytics()

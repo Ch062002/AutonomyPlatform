@@ -289,6 +289,14 @@ export const getDisturbanceAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/disturbance/analytics`);
 };
 
+export const getControllerBenchmark = () => {
+  return axios.get(`${API_BASE_URL}/control/benchmark`);
+};
+
+export const exportControllerBenchmark = () => {
+  window.open(`${API_BASE_URL}/control/benchmark/export`, "_blank");
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

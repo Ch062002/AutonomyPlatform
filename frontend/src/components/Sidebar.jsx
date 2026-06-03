@@ -1,5 +1,5 @@
 function Sidebar() {
-  const activeControlItem = "Robustness Testing";
+  const activeControlItem = "Benchmarking";
   const menuItems = [
     { label: "Dashboard" },
     { label: "Telemetry" },
@@ -10,7 +10,7 @@ function Sidebar() {
     },
     {
       label: "Control",
-      subItems: ["PID", "LQR", "SMC", "MPC", "Controller Manager", "Comparison", "Robustness Testing"]
+      subItems: ["PID", "LQR", "SMC", "MPC", "Controller Manager", "Comparison", "Robustness Testing", "Benchmarking"]
     },
     { label: "Commands" },
     { label: "Mission" },

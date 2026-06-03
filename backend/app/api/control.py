@@ -10,6 +10,10 @@ from app.control.controller_comparison import (
     export_comparison_csv,
     read_comparison_logs,
 )
+from app.control.controller_benchmark import (
+    build_controller_benchmark,
+    export_benchmark_csv,
+)
 from app.control.controllers.controller_manager import controller_manager
 from app.control.disturbance_testing import disturbance_testing_manager
 
@@ -223,6 +227,24 @@ def export_controller_comparison():
         export_file,
         media_type="text/csv",
         filename="controller_comparison_export.csv",
+    )
+
+
+@router.get("/benchmark")
+def get_controller_benchmark():
+    return build_controller_benchmark(
+        controller_manager,
+        disturbance_testing_manager,
+    )
+
+
+@router.get("/benchmark/export")
+def export_controller_benchmark():
+    export_file = export_benchmark_csv()
+    return FileResponse(
+        export_file,
+        media_type="text/csv",
+        filename="controller_benchmark_export.csv",
     )
 
 

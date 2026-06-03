@@ -30,6 +30,7 @@ import MPCStatusPanel from "../components/MPCStatusPanel";
 import ControllerSwitcherPanel from "../components/ControllerSwitcherPanel";
 import ControllerComparisonPanel from "../components/ControllerComparisonPanel";
 import DisturbanceTestingPanel from "../components/DisturbanceTestingPanel";
+import ControllerBenchmarkPanel from "../components/ControllerBenchmarkPanel";
 
 import {
   getBackendStatus,
@@ -380,6 +381,7 @@ function Dashboard() {
                 marginBottom: "1rem"
               }}
             >
+              <ControllerBenchmarkPanel />
               <ControllerComparisonPanel />
               <DisturbanceTestingPanel addCommandLog={addCommandLog} />
             </div>

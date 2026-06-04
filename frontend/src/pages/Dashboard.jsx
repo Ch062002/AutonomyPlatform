@@ -31,6 +31,7 @@ import ControllerSwitcherPanel from "../components/ControllerSwitcherPanel";
 import ControllerComparisonPanel from "../components/ControllerComparisonPanel";
 import DisturbanceTestingPanel from "../components/DisturbanceTestingPanel";
 import ControllerBenchmarkPanel from "../components/ControllerBenchmarkPanel";
+import ControlResearchDashboard from "../components/ControlResearchDashboard";
 
 import {
   getBackendStatus,
@@ -326,21 +327,22 @@ function Dashboard() {
 
           <div className="mission-workstation">
             <section className="workstation-column">
-              <SectionHeader label="Left Column" title="Navigation, Estimation, and Health" />
+              <SectionHeader label="Systems" title="Navigation, Estimation, Control, Health" />
               <div className="dashboard-stack">
                 <NavigationStatusPanel telemetry={telemetry} mission={mission} />
                 <StateEstimationPanel />
-                <ControlStatusPanel addCommandLog={addCommandLog} />
                 <ControllerSwitcherPanel addCommandLog={addCommandLog} />
                 <VehicleHealthPanel telemetry={telemetry} />
               </div>
             </section>
 
             <section className="workstation-column workstation-center">
-              <SectionHeader label="Center Column" title="Telemetry and Controller Analytics" />
+              <SectionHeader label="Telemetry" title="Live Vehicle and Controller Analytics" />
               <div className="dashboard-stack">
                 <TelemetryCard telemetry={telemetry} />
                 <TelemetryCharts history={telemetryHistory} />
+                <ControlStatusPanel addCommandLog={addCommandLog} />
+                <ControlResearchDashboard />
                 <MPCStatusPanel addCommandLog={addCommandLog} />
                 <SMCStatusPanel addCommandLog={addCommandLog} />
                 <LQRStatusPanel />
@@ -349,7 +351,7 @@ function Dashboard() {
             </section>
 
             <section className="workstation-column">
-              <SectionHeader label="Right Column" title="Mission Map, Guidance, and Execution" />
+              <SectionHeader label="Mission" title="Map, Guidance, and Execution" />
               <div className="dashboard-stack">
                 <MapPanel
                   telemetry={telemetry}
@@ -371,16 +373,9 @@ function Dashboard() {
           </div>
 
           <section className="dashboard-bottom-section">
-            <SectionHeader label="Bottom Section" title="Replay, Logs, Benchmarking, and Comparisons" />
+            <SectionHeader label="Analysis" title="Replay, Logs, Benchmarking, and Comparisons" />
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
-                gap: "1rem",
-                marginBottom: "1rem"
-              }}
-            >
+            <div className="bottom-analysis-grid">
               <ControllerBenchmarkPanel />
               <ControllerComparisonPanel />
               <DisturbanceTestingPanel addCommandLog={addCommandLog} />

@@ -189,6 +189,121 @@ def get_mpc_controller():
     return controller_manager.controllers["MPC"]
 
 
+def build_metric_lookup(rows, key="controller"):
+    return {
+        row.get(key): row
+        for row in rows
+        if row.get(key)
+    }
+
+
+def build_controller_status_cards(comparison, benchmark):
+    comparison_metrics = build_metric_lookup(comparison.get("metrics", []))
+    benchmark_metrics = build_metric_lookup(benchmark.get("results", []))
+    cards = []
+
+    for controller_name in ("PID", "LQR", "SMC", "MPC"):
+        comparison_row = comparison_metrics.get(controller_name, {})
+        benchmark_row = benchmark_metrics.get(controller_name, {})
+
+        cards.append({
+            "controller": controller_name,
+            "active": controller_name == controller_manager.active_controller,
+            "health": "ready",
+            "tracking_error": comparison_row.get("tracking_error", 0.0),
+            "control_effort": comparison_row.get("control_effort", 0.0),
+            "response_quality": comparison_row.get("response_quality", 0.0),
+            "robustness_score": comparison_row.get("robustness_score", 0.0),
+            "computation_time_ms": comparison_row.get("computation_time_ms", 0.0),
+            "benchmark_score": benchmark_row.get("overall_score", 0.0),
+            "samples": benchmark_row.get("samples", 0),
+        })
+
+    return cards
+
+
+def build_metric_summary(cards, metric_name, prefer_low=True):
+    if not cards:
+        return {
+            "metric": metric_name,
+            "best_controller": None,
+            "best_value": 0.0,
+            "values": {},
+        }
+
+    best = min(cards, key=lambda item: item.get(metric_name, 0.0)) if prefer_low else max(
+        cards,
+        key=lambda item: item.get(metric_name, 0.0),
+    )
+
+    return {
+        "metric": metric_name,
+        "best_controller": best["controller"],
+        "best_value": best.get(metric_name, 0.0),
+        "values": {
+            card["controller"]: card.get(metric_name, 0.0)
+            for card in cards
+        },
+    }
+
+
+def build_controller_leaderboard(cards):
+    ranked_cards = sorted(
+        cards,
+        key=lambda item: item.get("benchmark_score", 0.0),
+        reverse=True,
+    )
+
+    return [
+        {
+            "rank": index + 1,
+            "controller": card["controller"],
+            "active": card["active"],
+            "overall_score": card.get("benchmark_score", 0.0),
+            "tracking_error": card.get("tracking_error", 0.0),
+            "control_effort": card.get("control_effort", 0.0),
+            "robustness_score": card.get("robustness_score", 0.0),
+            "computation_time_ms": card.get("computation_time_ms", 0.0),
+            "health": card.get("health", "unknown"),
+        }
+        for index, card in enumerate(ranked_cards)
+    ]
+
+
+def build_control_analytics(comparison, benchmark, disturbance_analytics, cards):
+    comparison_metrics = comparison.get("metrics", [])
+    benchmark_results = benchmark.get("results", [])
+    active_card = next(
+        (card for card in cards if card.get("active")),
+        {},
+    )
+
+    return {
+        "controller_count": len(cards),
+        "active_controller": controller_manager.active_controller,
+        "active_health": active_card.get("health", "unknown"),
+        "comparison_samples": len(comparison_metrics),
+        "benchmark_samples": sum(row.get("samples", 0) for row in benchmark_results),
+        "disturbance_active": disturbance_analytics.get("disturbance_active", False),
+        "disturbance_scenario": disturbance_analytics.get("scenario_name"),
+        "average_tracking_error": (
+            sum(card.get("tracking_error", 0.0) for card in cards) / len(cards)
+            if cards
+            else 0.0
+        ),
+        "average_control_effort": (
+            sum(card.get("control_effort", 0.0) for card in cards) / len(cards)
+            if cards
+            else 0.0
+        ),
+        "average_benchmark_score": (
+            sum(card.get("benchmark_score", 0.0) for card in cards) / len(cards)
+            if cards
+            else 0.0
+        ),
+    }
+
+
 @router.get("/status")
 def get_control_status():
     status = controller_manager.get_status()
@@ -246,6 +361,66 @@ def export_controller_benchmark():
         media_type="text/csv",
         filename="controller_benchmark_export.csv",
     )
+
+
+@router.get("/research-summary")
+def get_control_research_summary():
+    controller_status = controller_manager.get_status()
+    comparison = build_controller_comparison(controller_manager)
+    disturbance_analytics = disturbance_testing_manager.analytics(controller_manager)
+    benchmark = build_controller_benchmark(
+        controller_manager,
+        disturbance_testing_manager,
+    )
+    controller_cards = build_controller_status_cards(comparison, benchmark)
+    tracking_error_summary = build_metric_summary(
+        controller_cards,
+        "tracking_error",
+        prefer_low=True,
+    )
+    control_effort_summary = build_metric_summary(
+        controller_cards,
+        "control_effort",
+        prefer_low=True,
+    )
+    robustness_summary = build_metric_summary(
+        controller_cards,
+        "robustness_score",
+        prefer_low=False,
+    )
+    computation_time_summary = build_metric_summary(
+        controller_cards,
+        "computation_time_ms",
+        prefer_low=True,
+    )
+
+    return {
+        "active_controller": controller_manager.active_controller,
+        "controller_status": controller_status,
+        "comparison": comparison,
+        "disturbance_analytics": disturbance_analytics,
+        "benchmark": benchmark,
+        "controller_cards": controller_cards,
+        "controller_leaderboard": build_controller_leaderboard(controller_cards),
+        "control_analytics": build_control_analytics(
+            comparison,
+            benchmark,
+            disturbance_analytics,
+            controller_cards,
+        ),
+        "best_controller_summary": {
+            "comparison_best": comparison.get("best_controller"),
+            "benchmark_best": benchmark.get("best_controller"),
+            "lowest_tracking_error": tracking_error_summary.get("best_controller"),
+            "highest_robustness": robustness_summary.get("best_controller"),
+            "lowest_control_effort": control_effort_summary.get("best_controller"),
+            "fastest_computation": computation_time_summary.get("best_controller"),
+        },
+        "control_effort_summary": control_effort_summary,
+        "tracking_error_summary": tracking_error_summary,
+        "robustness_summary": robustness_summary,
+        "computation_time_summary": computation_time_summary,
+    }
 
 
 @router.get("/disturbance/scenarios")

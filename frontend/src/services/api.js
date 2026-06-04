@@ -297,6 +297,10 @@ export const exportControllerBenchmark = () => {
   window.open(`${API_BASE_URL}/control/benchmark/export`, "_blank");
 };
 
+export const getControlResearchSummary = () => {
+  return axios.get(`${API_BASE_URL}/control/research-summary`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

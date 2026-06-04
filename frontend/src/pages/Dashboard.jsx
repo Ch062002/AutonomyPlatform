@@ -32,6 +32,7 @@ import ControllerComparisonPanel from "../components/ControllerComparisonPanel";
 import DisturbanceTestingPanel from "../components/DisturbanceTestingPanel";
 import ControllerBenchmarkPanel from "../components/ControllerBenchmarkPanel";
 import ControlResearchDashboard from "../components/ControlResearchDashboard";
+import GainSchedulingPanel from "../components/GainSchedulingPanel";
 
 import {
   getBackendStatus,
@@ -342,6 +343,7 @@ function Dashboard() {
                 <TelemetryCard telemetry={telemetry} />
                 <TelemetryCharts history={telemetryHistory} />
                 <ControlStatusPanel addCommandLog={addCommandLog} />
+                <GainSchedulingPanel />
                 <ControlResearchDashboard />
                 <MPCStatusPanel addCommandLog={addCommandLog} />
                 <SMCStatusPanel addCommandLog={addCommandLog} />

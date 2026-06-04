@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,7 @@ from app.control.controller_benchmark import (
     export_benchmark_csv,
 )
 from app.control.controllers.controller_manager import controller_manager
+from app.control.controllers.gain_scheduling import gain_scheduling_manager
 from app.control.disturbance_testing import disturbance_testing_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
@@ -65,6 +66,14 @@ class MPCConfigUpdate(BaseModel):
 
 class DisturbanceApplyRequest(BaseModel):
     scenario_name: str
+
+
+class GainSchedulingConfigUpdate(BaseModel):
+    config: Optional[Dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    altitude_regions: Optional[Dict[str, List[float]]] = None
+    velocity_regions: Optional[Dict[str, List[float]]] = None
+    schedules: Optional[Dict[str, Dict[str, Any]]] = None
 
 
 def get_latest_telemetry_data():
@@ -421,6 +430,37 @@ def get_control_research_summary():
         "robustness_summary": robustness_summary,
         "computation_time_summary": computation_time_summary,
     }
+
+
+@router.get("/gain-scheduling/status")
+def get_gain_scheduling_status():
+    return gain_scheduling_manager.get_status(
+        get_latest_telemetry_data(),
+        disturbance_testing_manager.analytics(controller_manager),
+    )
+
+
+@router.get("/gain-scheduling/config")
+def get_gain_scheduling_config():
+    return gain_scheduling_manager.get_config()
+
+
+@router.post("/gain-scheduling/config")
+def update_gain_scheduling_config(config_update: GainSchedulingConfigUpdate):
+    payload = config_update.config or config_update.model_dump(
+        exclude_none=True,
+        exclude={"config"},
+    )
+    return gain_scheduling_manager.update_config(payload)
+
+
+@router.get("/gain-scheduling/analytics")
+def get_gain_scheduling_analytics():
+    gain_scheduling_manager.get_status(
+        get_latest_telemetry_data(),
+        disturbance_testing_manager.analytics(controller_manager),
+    )
+    return gain_scheduling_manager.get_analytics()
 
 
 @router.get("/disturbance/scenarios")

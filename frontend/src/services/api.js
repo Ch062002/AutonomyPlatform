@@ -301,6 +301,24 @@ export const getControlResearchSummary = () => {
   return axios.get(`${API_BASE_URL}/control/research-summary`);
 };
 
+export const getGainSchedulingStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/gain-scheduling/status`);
+};
+
+export const getGainSchedulingConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/gain-scheduling/config`);
+};
+
+export const updateGainSchedulingConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/gain-scheduling/config`, {
+    config
+  });
+};
+
+export const getGainSchedulingAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/gain-scheduling/analytics`);
+};
+
 export const clearStateEstimationLogs = () => {
   return axios.post(`${API_BASE_URL}/state-estimation/logs/clear`);
 };

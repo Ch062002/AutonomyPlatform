@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.control.controllers.adaptive_pid import adaptive_pid_controller
 from app.control.controllers.lpv import lpv_controller
 from app.control.controllers.robust_mpc import robust_mpc_controller
+from app.control.controllers.tube_mpc import tube_mpc_controller
 
 CONTROLLER_COMPARISON_LOG_FILE = "/tmp/controller_comparison_log.jsonl"
 CONTROLLER_COMPARISON_EXPORT_FILE = "/tmp/controller_comparison_export.csv"
@@ -161,6 +162,23 @@ def _normalize_robust_mpc(analytics):
     }
 
 
+def _normalize_tube_mpc(analytics):
+    tracking_error = analytics.get("average_tracking_error", 0.0)
+    control_effort = analytics.get("average_control_effort", 0.0)
+    tube_violations = analytics.get("tube_violation_count", 0)
+
+    return {
+        "controller": "Tube MPC",
+        "tracking_error": tracking_error,
+        "control_effort": control_effort,
+        "response_quality": _bounded_inverse_score(tracking_error),
+        "robustness_score": _bounded_score(analytics.get("robustness_score", 0.0)),
+        "computation_time_ms": analytics.get("computation_time", 0.0),
+        "constraint_violations": tube_violations,
+        "health_score": _bounded_score(analytics.get("feasibility_rate", 0.0)),
+    }
+
+
 def _add_overall_score(metric):
     low_cost_score = _bounded_inverse_score(metric["control_effort"])
     low_time_score = _bounded_inverse_score(metric["computation_time_ms"])
@@ -186,6 +204,7 @@ def build_controller_comparison(controller_manager):
     smc_metrics = _normalize_smc(controller_manager.controllers["SMC"].get_analytics())
     mpc_metrics = _normalize_mpc(controller_manager.controllers["MPC"].get_analytics())
     robust_mpc_metrics = _normalize_robust_mpc(robust_mpc_controller.get_analytics())
+    tube_mpc_metrics = _normalize_tube_mpc(tube_mpc_controller.get_analytics())
     controllers = [
         _add_overall_score(pid_metrics),
         _add_overall_score(adaptive_pid_metrics),
@@ -194,6 +213,7 @@ def build_controller_comparison(controller_manager):
         _add_overall_score(smc_metrics),
         _add_overall_score(mpc_metrics),
         _add_overall_score(robust_mpc_metrics),
+        _add_overall_score(tube_mpc_metrics),
     ]
     best_controller = max(controllers, key=lambda item: item["overall_score"])
     result = {

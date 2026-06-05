@@ -309,6 +309,24 @@ export const getRobustMpcAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/robust-mpc/analytics`);
 };
 
+export const getTubeMpcStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/tube-mpc/status`);
+};
+
+export const getTubeMpcConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/tube-mpc/config`);
+};
+
+export const updateTubeMpcConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/tube-mpc/config`, {
+    config
+  });
+};
+
+export const getTubeMpcAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/tube-mpc/analytics`);
+};
+
 export const getControllerComparison = () => {
   return axios.get(`${API_BASE_URL}/control/comparison`);
 };

@@ -36,6 +36,7 @@ import GainSchedulingPanel from "../components/GainSchedulingPanel";
 import AdaptivePIDPanel from "../components/AdaptivePIDPanel";
 import LPVControlPanel from "../components/LPVControlPanel";
 import RobustMPCPanel from "../components/RobustMPCPanel";
+import TubeMPCPanel from "../components/TubeMPCPanel";
 
 import {
   getBackendStatus,
@@ -351,6 +352,7 @@ function Dashboard() {
                   <AdaptivePIDPanel addCommandLog={addCommandLog} />
                   <LPVControlPanel />
                   <RobustMPCPanel />
+                  <TubeMPCPanel />
                   <GainSchedulingPanel />
                 </div>
                 <ControlResearchDashboard />

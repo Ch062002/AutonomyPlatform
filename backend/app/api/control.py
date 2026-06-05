@@ -19,6 +19,7 @@ from app.control.controllers.adaptive_pid import adaptive_pid_controller
 from app.control.controllers.gain_scheduling import gain_scheduling_manager
 from app.control.controllers.lpv import lpv_controller
 from app.control.controllers.robust_mpc import robust_mpc_controller
+from app.control.controllers.tube_mpc import tube_mpc_controller
 from app.control.disturbance_testing import disturbance_testing_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
@@ -106,6 +107,19 @@ class RobustMPCConfigUpdate(BaseModel):
     input_constraints: Optional[Dict[str, List[float]]] = None
     q_weights: Optional[Dict[str, float]] = None
     r_weights: Optional[Dict[str, float]] = None
+
+
+class TubeMPCConfigUpdate(BaseModel):
+    config: Optional[Dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    prediction_horizon: Optional[int] = None
+    control_horizon: Optional[int] = None
+    dt: Optional[float] = None
+    tube_radius: Optional[float] = None
+    disturbance_bound: Optional[float] = None
+    constraint_tightening_level: Optional[float] = None
+    state_constraints: Optional[Dict[str, List[float]]] = None
+    input_constraints: Optional[Dict[str, List[float]]] = None
 
 
 def get_latest_telemetry_data():
@@ -230,6 +244,10 @@ def get_robust_mpc_controller():
     return robust_mpc_controller
 
 
+def get_tube_mpc_controller():
+    return tube_mpc_controller
+
+
 def get_lqr_controller():
     return controller_manager.controllers["LQR"]
 
@@ -255,7 +273,7 @@ def build_controller_status_cards(comparison, benchmark):
     benchmark_metrics = build_metric_lookup(benchmark.get("results", []))
     cards = []
 
-    for controller_name in ("PID", "Adaptive PID", "LQR", "LPV", "SMC", "MPC", "Robust MPC"):
+    for controller_name in ("PID", "Adaptive PID", "LQR", "LPV", "SMC", "MPC", "Robust MPC", "Tube MPC"):
         comparison_row = comparison_metrics.get(controller_name, {})
         benchmark_row = benchmark_metrics.get(controller_name, {})
 
@@ -677,6 +695,33 @@ def update_robust_mpc_config(config_update: RobustMPCConfigUpdate):
 @router.get("/robust-mpc/analytics")
 def get_robust_mpc_analytics():
     return get_robust_mpc_controller().get_analytics()
+
+
+@router.get("/tube-mpc/status")
+def get_tube_mpc_status():
+    return get_tube_mpc_controller().get_status(
+        state=build_mpc_state_from_telemetry(),
+        reference=build_mpc_reference_from_telemetry(),
+    )
+
+
+@router.get("/tube-mpc/config")
+def get_tube_mpc_config():
+    return get_tube_mpc_controller().get_config()
+
+
+@router.post("/tube-mpc/config")
+def update_tube_mpc_config(config_update: TubeMPCConfigUpdate):
+    payload = config_update.config or config_update.model_dump(
+        exclude_none=True,
+        exclude={"config"},
+    )
+    return get_tube_mpc_controller().update_config(payload)
+
+
+@router.get("/tube-mpc/analytics")
+def get_tube_mpc_analytics():
+    return get_tube_mpc_controller().get_analytics()
 
 
 @router.get("/lqr/status")

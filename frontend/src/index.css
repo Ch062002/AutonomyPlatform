@@ -147,6 +147,10 @@ p {
   grid-column: 1 / -1;
 }
 
+.controller-analytics-grid > .tube-mpc-panel {
+  grid-column: 1 / -1;
+}
+
 .control-research-panel {
   background: #111c2f;
   border: 1px solid #334155;
@@ -947,6 +951,131 @@ p {
   white-space: nowrap;
 }
 
+.tube-mpc-panel {
+  background: #101827;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.tube-mpc-header,
+.tube-mpc-metric-grid,
+.tube-mpc-detail-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.tube-mpc-header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.65rem;
+}
+
+.tube-mpc-header h2,
+.tube-mpc-block h3 {
+  margin: 0;
+}
+
+.tube-mpc-header h2 {
+  font-size: 1.08rem;
+}
+
+.tube-mpc-health {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.42rem 0.65rem;
+}
+
+.tube-mpc-health.ready {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.tube-mpc-health.disabled {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+.tube-mpc-metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.tube-mpc-detail-grid {
+  grid-template-columns: minmax(300px, 0.9fr) minmax(360px, 1.1fr);
+}
+
+.tube-mpc-metric,
+.tube-mpc-block {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.tube-mpc-metric {
+  min-height: 66px;
+  padding: 0.62rem;
+}
+
+.tube-mpc-metric span {
+  color: #94a3b8;
+  display: block;
+  font-size: 0.76rem;
+}
+
+.tube-mpc-metric strong {
+  color: #38bdf8;
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.tube-mpc-block {
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.tube-mpc-block h3 {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.tube-mpc-table {
+  display: grid;
+  min-width: 0;
+}
+
+.tube-parameter-table,
+.tube-constraint-table {
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+}
+
+.tube-mpc-table > div {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.45rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.tube-mpc-table strong {
+  border-top: 1px solid #1e293b;
+  color: #e2e8f0;
+  font-size: 0.77rem;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.38rem 0.45rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1500px) {
   .mission-workstation {
     grid-template-columns: minmax(280px, 0.9fr) minmax(560px, 1.45fr) minmax(320px, 0.95fr);
@@ -995,6 +1124,10 @@ p {
     grid-column: auto;
   }
 
+  .controller-analytics-grid > .tube-mpc-panel {
+    grid-column: auto;
+  }
+
   .gain-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1040,7 +1173,9 @@ p {
   .lpv-detail-grid,
   .lpv-footer-grid,
   .robust-mpc-metric-grid,
-  .robust-mpc-detail-grid {
+  .robust-mpc-detail-grid,
+  .tube-mpc-metric-grid,
+  .tube-mpc-detail-grid {
     grid-template-columns: 1fr;
   }
 

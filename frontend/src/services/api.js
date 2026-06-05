@@ -291,6 +291,24 @@ export const getMpcAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/mpc/analytics`);
 };
 
+export const getRobustMpcStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/robust-mpc/status`);
+};
+
+export const getRobustMpcConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/robust-mpc/config`);
+};
+
+export const updateRobustMpcConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/robust-mpc/config`, {
+    config
+  });
+};
+
+export const getRobustMpcAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/robust-mpc/analytics`);
+};
+
 export const getControllerComparison = () => {
   return axios.get(`${API_BASE_URL}/control/comparison`);
 };

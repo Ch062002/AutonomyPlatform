@@ -35,6 +35,7 @@ import ControlResearchDashboard from "../components/ControlResearchDashboard";
 import GainSchedulingPanel from "../components/GainSchedulingPanel";
 import AdaptivePIDPanel from "../components/AdaptivePIDPanel";
 import LPVControlPanel from "../components/LPVControlPanel";
+import RobustMPCPanel from "../components/RobustMPCPanel";
 
 import {
   getBackendStatus,
@@ -349,6 +350,7 @@ function Dashboard() {
                   <PIDStatusPanel addCommandLog={addCommandLog} />
                   <AdaptivePIDPanel addCommandLog={addCommandLog} />
                   <LPVControlPanel />
+                  <RobustMPCPanel />
                   <GainSchedulingPanel />
                 </div>
                 <ControlResearchDashboard />

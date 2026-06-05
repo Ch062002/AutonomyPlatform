@@ -18,6 +18,7 @@ from app.control.controllers.controller_manager import controller_manager
 from app.control.controllers.adaptive_pid import adaptive_pid_controller
 from app.control.controllers.gain_scheduling import gain_scheduling_manager
 from app.control.controllers.lpv import lpv_controller
+from app.control.controllers.robust_mpc import robust_mpc_controller
 from app.control.disturbance_testing import disturbance_testing_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
@@ -92,6 +93,19 @@ class LPVConfigUpdate(BaseModel):
     enabled: Optional[bool] = None
     scheduling_variables: Optional[Dict[str, Dict[str, Any]]] = None
     regions: Optional[Dict[str, Dict[str, Any]]] = None
+
+
+class RobustMPCConfigUpdate(BaseModel):
+    config: Optional[Dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    prediction_horizon: Optional[int] = None
+    control_horizon: Optional[int] = None
+    dt: Optional[float] = None
+    uncertainty_models: Optional[Dict[str, Dict[str, Any]]] = None
+    state_constraints: Optional[Dict[str, List[float]]] = None
+    input_constraints: Optional[Dict[str, List[float]]] = None
+    q_weights: Optional[Dict[str, float]] = None
+    r_weights: Optional[Dict[str, float]] = None
 
 
 def get_latest_telemetry_data():
@@ -212,6 +226,10 @@ def get_lpv_controller():
     return lpv_controller
 
 
+def get_robust_mpc_controller():
+    return robust_mpc_controller
+
+
 def get_lqr_controller():
     return controller_manager.controllers["LQR"]
 
@@ -237,7 +255,7 @@ def build_controller_status_cards(comparison, benchmark):
     benchmark_metrics = build_metric_lookup(benchmark.get("results", []))
     cards = []
 
-    for controller_name in ("PID", "LQR", "SMC", "MPC"):
+    for controller_name in ("PID", "Adaptive PID", "LQR", "LPV", "SMC", "MPC", "Robust MPC"):
         comparison_row = comparison_metrics.get(controller_name, {})
         benchmark_row = benchmark_metrics.get(controller_name, {})
 
@@ -632,6 +650,33 @@ def update_lpv_config(config_update: LPVConfigUpdate):
 @router.get("/lpv/analytics")
 def get_lpv_analytics():
     return get_lpv_controller().get_analytics()
+
+
+@router.get("/robust-mpc/status")
+def get_robust_mpc_status():
+    return get_robust_mpc_controller().get_status(
+        state=build_mpc_state_from_telemetry(),
+        reference=build_mpc_reference_from_telemetry(),
+    )
+
+
+@router.get("/robust-mpc/config")
+def get_robust_mpc_config():
+    return get_robust_mpc_controller().get_config()
+
+
+@router.post("/robust-mpc/config")
+def update_robust_mpc_config(config_update: RobustMPCConfigUpdate):
+    payload = config_update.config or config_update.model_dump(
+        exclude_none=True,
+        exclude={"config"},
+    )
+    return get_robust_mpc_controller().update_config(payload)
+
+
+@router.get("/robust-mpc/analytics")
+def get_robust_mpc_analytics():
+    return get_robust_mpc_controller().get_analytics()
 
 
 @router.get("/lqr/status")

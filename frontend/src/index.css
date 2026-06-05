@@ -143,6 +143,10 @@ p {
   grid-column: 1 / -1;
 }
 
+.controller-analytics-grid > .robust-mpc-panel {
+  grid-column: 1 / -1;
+}
+
 .control-research-panel {
   background: #111c2f;
   border: 1px solid #334155;
@@ -815,6 +819,134 @@ p {
   grid-template-columns: minmax(72px, 0.8fr) minmax(110px, 1fr);
 }
 
+.robust-mpc-panel {
+  background: #101827;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.robust-mpc-header,
+.robust-mpc-metric-grid,
+.robust-mpc-detail-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.robust-mpc-header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.65rem;
+}
+
+.robust-mpc-header h2,
+.robust-mpc-block h3 {
+  margin: 0;
+}
+
+.robust-mpc-header h2 {
+  font-size: 1.08rem;
+}
+
+.robust-mpc-health {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.42rem 0.65rem;
+}
+
+.robust-mpc-health.ready {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.robust-mpc-health.disabled {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+.robust-mpc-metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.robust-mpc-detail-grid {
+  grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.2fr);
+}
+
+.robust-mpc-metric,
+.robust-mpc-block {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.robust-mpc-metric {
+  min-height: 66px;
+  padding: 0.62rem;
+}
+
+.robust-mpc-metric span {
+  color: #94a3b8;
+  display: block;
+  font-size: 0.76rem;
+}
+
+.robust-mpc-metric strong {
+  color: #38bdf8;
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.robust-mpc-block {
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.robust-mpc-block h3 {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.robust-mpc-table {
+  display: grid;
+  min-width: 0;
+}
+
+.uncertainty-table {
+  grid-template-columns: minmax(150px, 1.2fr) minmax(72px, 0.6fr) minmax(92px, 0.7fr);
+}
+
+.constraint-table {
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+}
+
+.robust-mpc-table > div {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.45rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.robust-mpc-table strong {
+  border-top: 1px solid #1e293b;
+  color: #e2e8f0;
+  font-size: 0.77rem;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.38rem 0.45rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1500px) {
   .mission-workstation {
     grid-template-columns: minmax(280px, 0.9fr) minmax(560px, 1.45fr) minmax(320px, 0.95fr);
@@ -856,6 +988,10 @@ p {
   }
 
   .controller-analytics-grid > .adaptive-pid-panel {
+    grid-column: auto;
+  }
+
+  .controller-analytics-grid > .robust-mpc-panel {
     grid-column: auto;
   }
 
@@ -902,7 +1038,9 @@ p {
   .adaptive-axis-tabs,
   .lpv-metric-grid,
   .lpv-detail-grid,
-  .lpv-footer-grid {
+  .lpv-footer-grid,
+  .robust-mpc-metric-grid,
+  .robust-mpc-detail-grid {
     grid-template-columns: 1fr;
   }
 

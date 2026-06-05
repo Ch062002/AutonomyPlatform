@@ -49,6 +49,15 @@ def _controller_samples(controller):
     return int(_safe_number(analytics.get("samples"), 0))
 
 
+def _controller_samples_by_name(controller_manager, controller_name):
+    controller = controller_manager.controllers.get(controller_name)
+
+    if controller is None:
+        return 0
+
+    return _controller_samples(controller)
+
+
 def _disturbance_rejection_score(metric, disturbance_manager, controller_name):
     if (
         disturbance_manager.active_scenario is not None
@@ -88,7 +97,7 @@ def build_controller_benchmark(controller_manager, disturbance_manager):
 
         benchmark_rows.append({
             "controller": controller_name,
-            "samples": _controller_samples(controller_manager.controllers[controller_name]),
+            "samples": _controller_samples_by_name(controller_manager, controller_name),
             "tracking_error_score": tracking_error_score,
             "control_effort_score": control_effort_score,
             "robustness_score": robustness_score,

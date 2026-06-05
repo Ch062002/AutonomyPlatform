@@ -205,6 +205,24 @@ export const getPidAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/pid/analytics`);
 };
 
+export const getAdaptivePidStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/adaptive-pid/status`);
+};
+
+export const getAdaptivePidConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/adaptive-pid/config`);
+};
+
+export const updateAdaptivePidConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/adaptive-pid/config`, {
+    config
+  });
+};
+
+export const getAdaptivePidAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/adaptive-pid/analytics`);
+};
+
 export const getLqrStatus = () => {
   return axios.get(`${API_BASE_URL}/control/lqr/status`);
 };

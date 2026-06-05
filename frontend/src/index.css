@@ -94,7 +94,7 @@ p {
 
 .mission-workstation {
   display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(560px, 1.55fr) minmax(330px, 1fr);
+  grid-template-columns: minmax(300px, 0.95fr) minmax(680px, 1.75fr) minmax(360px, 1.05fr);
   gap: 0.9rem;
   align-items: start;
 }
@@ -126,6 +126,17 @@ p {
   grid-template-columns: repeat(3, minmax(300px, 1fr));
   gap: 0.8rem;
   margin-bottom: 0.8rem;
+}
+
+.controller-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.controller-analytics-grid > .gain-scheduling-panel {
+  grid-column: 1 / -1;
 }
 
 .control-research-panel {
@@ -498,9 +509,149 @@ p {
   text-align: right;
 }
 
+.adaptive-pid-panel {
+  background: #101827;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.adaptive-pid-header,
+.adaptive-pid-metrics,
+.adaptive-gain-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.adaptive-pid-header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.65rem;
+}
+
+.adaptive-pid-header h2,
+.adaptive-gain-block h3 {
+  margin: 0;
+}
+
+.adaptive-pid-header h2 {
+  font-size: 1.08rem;
+}
+
+.adaptive-toggle {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.42rem 0.65rem;
+}
+
+.adaptive-toggle.enabled {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.adaptive-toggle.disabled {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+.adaptive-axis-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.adaptive-axis-tabs button {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #e2e8f0;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.5rem 0.35rem;
+  text-transform: capitalize;
+}
+
+.adaptive-axis-tabs button.active {
+  background: #0f3b57;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.adaptive-pid-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.adaptive-gain-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.adaptive-metric,
+.adaptive-gain-block {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.adaptive-metric {
+  min-height: 66px;
+  padding: 0.62rem;
+}
+
+.adaptive-metric span,
+.adaptive-mini-row span {
+  color: #94a3b8;
+  display: block;
+  font-size: 0.76rem;
+}
+
+.adaptive-metric strong {
+  color: #38bdf8;
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.adaptive-gain-block {
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.adaptive-gain-block h3 {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.adaptive-mini-row {
+  align-items: start;
+  border-top: 1px solid #1e293b;
+  color: #94a3b8;
+  display: grid;
+  font-size: 0.77rem;
+  gap: 0.5rem;
+  grid-template-columns: 58px minmax(0, 1fr);
+  padding: 0.32rem 0;
+}
+
+.adaptive-mini-row strong {
+  color: #e2e8f0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
 @media (max-width: 1500px) {
   .mission-workstation {
-    grid-template-columns: minmax(260px, 0.85fr) minmax(500px, 1.45fr) minmax(300px, 0.95fr);
+    grid-template-columns: minmax(280px, 0.9fr) minmax(560px, 1.45fr) minmax(320px, 0.95fr);
   }
 }
 
@@ -528,8 +679,14 @@ p {
   .research-main-grid,
   .research-chart-grid,
   .analytics-grid,
-  .gain-preset-grid {
+  .gain-preset-grid,
+  .adaptive-gain-grid,
+  .controller-analytics-grid {
     grid-template-columns: 1fr;
+  }
+
+  .controller-analytics-grid > .gain-scheduling-panel {
+    grid-column: auto;
   }
 
   .gain-summary-grid {
@@ -570,7 +727,9 @@ p {
   .controller-health-grid,
   .gain-summary-grid,
   .gain-region-grid,
-  .gain-analytics-grid {
+  .gain-analytics-grid,
+  .adaptive-pid-metrics,
+  .adaptive-axis-tabs {
     grid-template-columns: 1fr;
   }
 

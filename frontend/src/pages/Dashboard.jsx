@@ -33,6 +33,7 @@ import DisturbanceTestingPanel from "../components/DisturbanceTestingPanel";
 import ControllerBenchmarkPanel from "../components/ControllerBenchmarkPanel";
 import ControlResearchDashboard from "../components/ControlResearchDashboard";
 import GainSchedulingPanel from "../components/GainSchedulingPanel";
+import AdaptivePIDPanel from "../components/AdaptivePIDPanel";
 
 import {
   getBackendStatus,
@@ -338,22 +339,22 @@ function Dashboard() {
             </section>
 
             <section className="workstation-column workstation-center">
-              <SectionHeader label="Telemetry" title="Live Vehicle and Controller Analytics" />
+              <SectionHeader label="Telemetry" title="Telemetry and Control Analytics" />
               <div className="dashboard-stack">
                 <TelemetryCard telemetry={telemetry} />
                 <TelemetryCharts history={telemetryHistory} />
                 <ControlStatusPanel addCommandLog={addCommandLog} />
-                <GainSchedulingPanel />
+                <div className="controller-analytics-grid">
+                  <PIDStatusPanel addCommandLog={addCommandLog} />
+                  <AdaptivePIDPanel addCommandLog={addCommandLog} />
+                  <GainSchedulingPanel />
+                </div>
                 <ControlResearchDashboard />
-                <MPCStatusPanel addCommandLog={addCommandLog} />
-                <SMCStatusPanel addCommandLog={addCommandLog} />
-                <LQRStatusPanel />
-                <PIDStatusPanel addCommandLog={addCommandLog} />
               </div>
             </section>
 
             <section className="workstation-column">
-              <SectionHeader label="Mission" title="Map, Guidance, and Execution" />
+              <SectionHeader label="Mission" title="Map, Guidance, and Mission" />
               <div className="dashboard-stack">
                 <MapPanel
                   telemetry={telemetry}
@@ -384,6 +385,9 @@ function Dashboard() {
             </div>
 
             <div className="dashboard-grid dashboard-grid-four">
+              <MPCStatusPanel addCommandLog={addCommandLog} />
+              <SMCStatusPanel addCommandLog={addCommandLog} />
+              <LQRStatusPanel />
               <MissionReplayPanel />
               <NavigationReplayPanel />
               <CommandLog logs={commandLogs} />

@@ -15,6 +15,7 @@ from app.control.controller_benchmark import (
     export_benchmark_csv,
 )
 from app.control.controllers.controller_manager import controller_manager
+from app.control.controllers.adaptive_pid import adaptive_pid_controller
 from app.control.controllers.gain_scheduling import gain_scheduling_manager
 from app.control.disturbance_testing import disturbance_testing_manager
 
@@ -74,6 +75,15 @@ class GainSchedulingConfigUpdate(BaseModel):
     altitude_regions: Optional[Dict[str, List[float]]] = None
     velocity_regions: Optional[Dict[str, List[float]]] = None
     schedules: Optional[Dict[str, Dict[str, Any]]] = None
+
+
+class AdaptivePIDConfigUpdate(BaseModel):
+    config: Optional[Dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    adaptation_enabled: Optional[bool] = None
+    base_gains: Optional[Dict[str, PIDAxisGains]] = None
+    adaptation_rate: Optional[Dict[str, float]] = None
+    gain_limits: Optional[Dict[str, List[float]]] = None
 
 
 def get_latest_telemetry_data():
@@ -184,6 +194,10 @@ def build_mpc_reference_from_telemetry():
 
 def get_pid_controller():
     return controller_manager.controllers["PID"]
+
+
+def get_adaptive_pid_controller():
+    return adaptive_pid_controller
 
 
 def get_lqr_controller():
@@ -543,6 +557,45 @@ def update_pid_config(config: PIDConfigUpdate):
 @router.get("/pid/analytics")
 def get_pid_analytics():
     return get_pid_controller().get_analytics()
+
+
+@router.get("/adaptive-pid/status")
+def get_adaptive_pid_status():
+    return get_adaptive_pid_controller().get_status(
+        state=build_pid_state_from_telemetry(),
+        reference=build_pid_reference_from_telemetry(),
+    )
+
+
+@router.get("/adaptive-pid/config")
+def get_adaptive_pid_config():
+    return get_adaptive_pid_controller().get_config()
+
+
+@router.post("/adaptive-pid/config")
+def update_adaptive_pid_config(config_update: AdaptivePIDConfigUpdate):
+    if config_update.config is not None:
+        payload = config_update.config
+    else:
+        payload = config_update.model_dump(
+            exclude_none=True,
+            exclude={"config"},
+        )
+
+    if "base_gains" in payload:
+        payload["base_gains"] = {
+            axis: axis_gains.model_dump(exclude_none=True)
+            if hasattr(axis_gains, "model_dump")
+            else axis_gains
+            for axis, axis_gains in payload["base_gains"].items()
+        }
+
+    return get_adaptive_pid_controller().update_config(payload)
+
+
+@router.get("/adaptive-pid/analytics")
+def get_adaptive_pid_analytics():
+    return get_adaptive_pid_controller().get_analytics()
 
 
 @router.get("/lqr/status")

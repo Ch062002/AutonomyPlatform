@@ -104,19 +104,13 @@ function AdaptivePIDPanel({ addCommandLog }) {
       </div>
 
       <div className="adaptive-gain-grid">
-        <GainBlock title="Base Gains" gains={baseGains} />
-        <GainBlock title="Adaptive Gains" gains={adaptiveGains} />
         <div className="adaptive-gain-block">
-          <h3>Adaptation Rate</h3>
-          <MiniRow label="Alpha" value={formatNumber(rate.alpha, 4)} />
-          <MiniRow label="Beta" value={formatNumber(rate.beta, 4)} />
-          <MiniRow label="Gamma" value={formatNumber(rate.gamma, 4)} />
+          <h3>Base vs Adaptive Gains</h3>
+          <GainComparisonTable baseGains={baseGains} adaptiveGains={adaptiveGains} />
         </div>
         <div className="adaptive-gain-block">
-          <h3>Gain Limits</h3>
-          <MiniRow label="Kp" value={limitText(limits.kp)} />
-          <MiniRow label="Ki" value={limitText(limits.ki)} />
-          <MiniRow label="Kd" value={limitText(limits.kd)} />
+          <h3>Adaptation Rate and Limits</h3>
+          <AdaptationTable rate={rate} limits={limits} />
         </div>
       </div>
 
@@ -130,13 +124,40 @@ function AdaptivePIDPanel({ addCommandLog }) {
   );
 }
 
-function GainBlock({ title, gains }) {
+function GainComparisonTable({ baseGains, adaptiveGains }) {
   return (
-    <div className="adaptive-gain-block">
-      <h3>{title}</h3>
-      <MiniRow label="Kp" value={formatNumber(gains.kp)} />
-      <MiniRow label="Ki" value={formatNumber(gains.ki)} />
-      <MiniRow label="Kd" value={formatNumber(gains.kd)} />
+    <div className="adaptive-gain-table">
+      <div>Gain</div>
+      <div>Base</div>
+      <div>Adaptive</div>
+      <span>Kp</span>
+      <strong>{formatNumber(baseGains.kp)}</strong>
+      <strong>{formatNumber(adaptiveGains.kp)}</strong>
+      <span>Ki</span>
+      <strong>{formatNumber(baseGains.ki)}</strong>
+      <strong>{formatNumber(adaptiveGains.ki)}</strong>
+      <span>Kd</span>
+      <strong>{formatNumber(baseGains.kd)}</strong>
+      <strong>{formatNumber(adaptiveGains.kd)}</strong>
+    </div>
+  );
+}
+
+function AdaptationTable({ rate, limits }) {
+  return (
+    <div className="adaptive-gain-table adaptive-rate-table">
+      <div>Term</div>
+      <div>Rate</div>
+      <div>Limit</div>
+      <span>Kp / Alpha</span>
+      <strong>{formatNumber(rate.alpha, 4)}</strong>
+      <strong>{limitText(limits.kp)}</strong>
+      <span>Ki / Beta</span>
+      <strong>{formatNumber(rate.beta, 4)}</strong>
+      <strong>{limitText(limits.ki)}</strong>
+      <span>Kd / Gamma</span>
+      <strong>{formatNumber(rate.gamma, 4)}</strong>
+      <strong>{limitText(limits.kd)}</strong>
     </div>
   );
 }
@@ -147,15 +168,6 @@ function limitText(values) {
   }
 
   return `${formatNumber(values[0])} - ${formatNumber(values[1])}`;
-}
-
-function MiniRow({ label, value }) {
-  return (
-    <div className="adaptive-mini-row">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
 }
 
 function Metric({ label, value }) {

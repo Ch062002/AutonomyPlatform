@@ -34,6 +34,7 @@ import ControllerBenchmarkPanel from "../components/ControllerBenchmarkPanel";
 import ControlResearchDashboard from "../components/ControlResearchDashboard";
 import GainSchedulingPanel from "../components/GainSchedulingPanel";
 import AdaptivePIDPanel from "../components/AdaptivePIDPanel";
+import LPVControlPanel from "../components/LPVControlPanel";
 
 import {
   getBackendStatus,
@@ -347,6 +348,7 @@ function Dashboard() {
                 <div className="controller-analytics-grid">
                   <PIDStatusPanel addCommandLog={addCommandLog} />
                   <AdaptivePIDPanel addCommandLog={addCommandLog} />
+                  <LPVControlPanel />
                   <GainSchedulingPanel />
                 </div>
                 <ControlResearchDashboard />

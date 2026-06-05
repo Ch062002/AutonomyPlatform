@@ -223,6 +223,24 @@ export const getAdaptivePidAnalytics = () => {
   return axios.get(`${API_BASE_URL}/control/adaptive-pid/analytics`);
 };
 
+export const getLpvStatus = () => {
+  return axios.get(`${API_BASE_URL}/control/lpv/status`);
+};
+
+export const getLpvConfig = () => {
+  return axios.get(`${API_BASE_URL}/control/lpv/config`);
+};
+
+export const updateLpvConfig = (config) => {
+  return axios.post(`${API_BASE_URL}/control/lpv/config`, {
+    config
+  });
+};
+
+export const getLpvAnalytics = () => {
+  return axios.get(`${API_BASE_URL}/control/lpv/analytics`);
+};
+
 export const getLqrStatus = () => {
   return axios.get(`${API_BASE_URL}/control/lqr/status`);
 };

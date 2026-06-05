@@ -10,7 +10,7 @@ function Sidebar() {
     },
     {
       label: "Control",
-      subItems: ["PID", "Adaptive PID", "LQR", "SMC", "MPC", "Comparison", "Robustness Testing", "Benchmarking", "Gain Scheduling", "Research Dashboard"]
+      subItems: ["PID", "Adaptive PID", "LPV", "LQR", "SMC", "MPC", "Comparison", "Robustness Testing", "Benchmarking", "Gain Scheduling", "Research Dashboard"]
     },
     { label: "Commands" },
     { label: "Mission" },

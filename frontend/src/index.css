@@ -139,6 +139,10 @@ p {
   grid-column: 1 / -1;
 }
 
+.controller-analytics-grid > .adaptive-pid-panel {
+  grid-column: 1 / -1;
+}
+
 .control-research-panel {
   background: #111c2f;
   border: 1px solid #334155;
@@ -589,7 +593,7 @@ p {
 }
 
 .adaptive-gain-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
   margin-bottom: 0.65rem;
 }
 
@@ -605,8 +609,7 @@ p {
   padding: 0.62rem;
 }
 
-.adaptive-metric span,
-.adaptive-mini-row span {
+.adaptive-metric span {
   color: #94a3b8;
   display: block;
   font-size: 0.76rem;
@@ -631,22 +634,185 @@ p {
   margin-bottom: 0.5rem;
 }
 
-.adaptive-mini-row {
-  align-items: start;
-  border-top: 1px solid #1e293b;
+.adaptive-gain-table,
+.lpv-gain-table {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.adaptive-gain-table {
+  grid-template-columns: minmax(86px, 0.8fr) repeat(2, minmax(110px, 1fr));
+}
+
+.adaptive-rate-table {
+  grid-template-columns: minmax(100px, 0.85fr) minmax(90px, 0.8fr) minmax(150px, 1.2fr);
+}
+
+.adaptive-gain-table > div,
+.lpv-gain-table > div {
   color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.45rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.adaptive-gain-table span,
+.adaptive-gain-table strong,
+.lpv-gain-table span,
+.lpv-gain-table strong {
+  border-top: 1px solid #1e293b;
+  font-size: 0.77rem;
+  min-width: 0;
+  padding: 0.38rem 0.45rem;
+  white-space: nowrap;
+}
+
+.adaptive-gain-table span,
+.lpv-gain-table span {
+  color: #94a3b8;
+}
+
+.adaptive-gain-table strong,
+.lpv-gain-table strong {
+  color: #e2e8f0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.lpv-control-panel {
+  background: #101827;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.lpv-header,
+.lpv-metric-grid,
+.lpv-detail-grid,
+.lpv-footer-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.lpv-header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 0.65rem;
+}
+
+.lpv-header h2,
+.lpv-block h3 {
+  margin: 0;
+}
+
+.lpv-header h2 {
+  font-size: 1.08rem;
+}
+
+.lpv-health {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.42rem 0.65rem;
+}
+
+.lpv-health.ready {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.lpv-health.disabled {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+.lpv-metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.lpv-detail-grid {
+  grid-template-columns: minmax(220px, 0.95fr) minmax(220px, 1.05fr);
+  margin-bottom: 0.65rem;
+}
+
+.lpv-footer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lpv-metric,
+.lpv-block {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.lpv-metric {
+  min-height: 66px;
+  padding: 0.62rem;
+}
+
+.lpv-metric span,
+.lpv-mini-row span {
+  color: #94a3b8;
+  display: block;
+  font-size: 0.76rem;
+}
+
+.lpv-metric strong {
+  color: #38bdf8;
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  overflow-wrap: anywhere;
+}
+
+.lpv-block {
+  min-width: 0;
+  padding: 0.65rem;
+}
+
+.lpv-block h3 {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.lpv-mini-row {
+  align-items: center;
+  border-top: 1px solid #1e293b;
   display: grid;
   font-size: 0.77rem;
   gap: 0.5rem;
-  grid-template-columns: 58px minmax(0, 1fr);
-  padding: 0.32rem 0;
+  grid-template-columns: 72px minmax(78px, 1fr) minmax(82px, 1fr);
+  padding: 0.38rem 0;
 }
 
-.adaptive-mini-row strong {
+.lpv-mini-row strong {
   color: #e2e8f0;
-  font-weight: 700;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lpv-mini-row em {
+  color: #94a3b8;
+  font-style: normal;
+  overflow: hidden;
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lpv-gain-table {
+  grid-template-columns: minmax(72px, 0.8fr) minmax(110px, 1fr);
 }
 
 @media (max-width: 1500px) {
@@ -686,6 +852,10 @@ p {
   }
 
   .controller-analytics-grid > .gain-scheduling-panel {
+    grid-column: auto;
+  }
+
+  .controller-analytics-grid > .adaptive-pid-panel {
     grid-column: auto;
   }
 
@@ -729,7 +899,10 @@ p {
   .gain-region-grid,
   .gain-analytics-grid,
   .adaptive-pid-metrics,
-  .adaptive-axis-tabs {
+  .adaptive-axis-tabs,
+  .lpv-metric-grid,
+  .lpv-detail-grid,
+  .lpv-footer-grid {
     grid-template-columns: 1fr;
   }
 

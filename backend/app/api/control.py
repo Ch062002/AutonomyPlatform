@@ -17,6 +17,7 @@ from app.control.controller_benchmark import (
 from app.control.controllers.controller_manager import controller_manager
 from app.control.controllers.adaptive_pid import adaptive_pid_controller
 from app.control.controllers.gain_scheduling import gain_scheduling_manager
+from app.control.controllers.lpv import lpv_controller
 from app.control.disturbance_testing import disturbance_testing_manager
 
 router = APIRouter(prefix="/control", tags=["control"])
@@ -84,6 +85,13 @@ class AdaptivePIDConfigUpdate(BaseModel):
     base_gains: Optional[Dict[str, PIDAxisGains]] = None
     adaptation_rate: Optional[Dict[str, float]] = None
     gain_limits: Optional[Dict[str, List[float]]] = None
+
+
+class LPVConfigUpdate(BaseModel):
+    config: Optional[Dict[str, Any]] = None
+    enabled: Optional[bool] = None
+    scheduling_variables: Optional[Dict[str, Dict[str, Any]]] = None
+    regions: Optional[Dict[str, Dict[str, Any]]] = None
 
 
 def get_latest_telemetry_data():
@@ -198,6 +206,10 @@ def get_pid_controller():
 
 def get_adaptive_pid_controller():
     return adaptive_pid_controller
+
+
+def get_lpv_controller():
+    return lpv_controller
 
 
 def get_lqr_controller():
@@ -596,6 +608,30 @@ def update_adaptive_pid_config(config_update: AdaptivePIDConfigUpdate):
 @router.get("/adaptive-pid/analytics")
 def get_adaptive_pid_analytics():
     return get_adaptive_pid_controller().get_analytics()
+
+
+@router.get("/lpv/status")
+def get_lpv_status():
+    return get_lpv_controller().get_status(get_latest_telemetry_data())
+
+
+@router.get("/lpv/config")
+def get_lpv_config():
+    return get_lpv_controller().get_config()
+
+
+@router.post("/lpv/config")
+def update_lpv_config(config_update: LPVConfigUpdate):
+    payload = config_update.config or config_update.model_dump(
+        exclude_none=True,
+        exclude={"config"},
+    )
+    return get_lpv_controller().update_config(payload)
+
+
+@router.get("/lpv/analytics")
+def get_lpv_analytics():
+    return get_lpv_controller().get_analytics()
 
 
 @router.get("/lqr/status")
